@@ -1,7 +1,10 @@
 import { app, BrowserWindow, Menu, dialog } from 'electron';
+import logger from './logging';
 import * as path from 'path';
 
 function createWindow(): void {
+
+    logger.info('Creating main window');
 
     const mainWindow = new BrowserWindow({
         width: 800,
