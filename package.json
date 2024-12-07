@@ -2,7 +2,7 @@
   "name": "zinspector",
   "version": "1.0.0",
   "description": "Inspection software demo prototype",
-  "main": "src/main.js",
+  "main": "dist/main.js",
   "scripts": {
     "start": "electron .",
     "test": "echo \"Error: no test specified\" && exit 1"
@@ -10,7 +10,10 @@
   "author": "Frank Blankenburg",
   "license": "ISC",
   "devDependencies": {
-    "electron": "^33.2.1"
+    "@types/electron": "^1.6.12",
+    "@types/node": "^22.10.1",
+    "electron": "^33.2.1",
+    "typescript": "^5.7.2"
   },
   "dependencies": {
     "neon-cli": "^0.10.1"

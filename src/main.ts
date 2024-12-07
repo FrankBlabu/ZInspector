@@ -1,8 +1,7 @@
-const { app, BrowserWindow, Menu, dialog } = require('electron');
-const path = require('path');
-const console = require('console');
+import { app, BrowserWindow, Menu, dialog } from 'electron';
+import * as path from 'path';
 
-function createWindow() {
+function createWindow(): void {
 
     const mainWindow = new BrowserWindow({
         width: 800,
@@ -12,9 +11,7 @@ function createWindow() {
         }
     });
 
-    console.log('--- MAIN ---');
-
-    mainWindow.loadFile('src/index.html');
+    mainWindow.loadFile('ui/index.html');
 
     mainWindow.webContents.openDevTools();
 
