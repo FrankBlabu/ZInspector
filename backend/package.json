@@ -17,5 +17,8 @@
   "license": "ISC",
   "devDependencies": {
     "@neon-rs/cli": "0.1.82"
+  },
+  "dependencies": {
+    "neon-cli": "^0.10.1"
   }
 }
