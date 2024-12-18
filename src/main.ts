@@ -1,12 +1,31 @@
+/**
+ * main.ts - Main entry point for the Electron app.
+ * 
+ * This file creates the main window and sets up the application.
+ */
+
 import { app, BrowserWindow, Menu, dialog } from 'electron';
 import logger from './logging';
 import * as path from 'path';
 
+// Application main window
+let mainWindow: BrowserWindow | null = null;
+
+/**
+ * Create the main window for the application.
+ */
 function createWindow(): void {
 
     logger.info('Creating main window');
 
-    const mainWindow = new BrowserWindow({
+    //
+    // Create the main window. The main window is rendering the UI,
+    // The renderer process runs in a sandboxed environment and has no
+    // access to native APIs. It can only communicate with the main process
+    // via IPC. The preload.js script is used to expose a limited set of
+    // native APIs to the renderer process.
+    //
+    mainWindow = new BrowserWindow({
         width: 800,
         height: 600,
         webPreferences: {
@@ -16,24 +35,16 @@ function createWindow(): void {
 
     mainWindow.loadFile('ui/index.html');
 
-    mainWindow.webContents.openDevTools();
-
+    //
+    // Set up the application menu
+    //
     const menu = Menu.buildFromTemplate([
         {
             label: 'File',
             submenu: [
                 {
                     label: 'Open STL File',
-                    click: async () => {
-                        const { canceled, filePaths } = await dialog.showOpenDialog(mainWindow, {
-                            filters: [{ name: 'STL Files', extensions: ['stl'] }],
-                            properties: ['openFile']
-                        });
-                        if (!canceled && filePaths.length > 0) {
-                            console.log(`Selected file: ${filePaths[0]}`);
-                            // Handle the selected STL file here
-                        }
-                    }
+                    click: async () => onOpenFile()
                 },
                 { role: 'quit' }
             ]
@@ -43,13 +54,7 @@ function createWindow(): void {
             submenu: [
                 {
                     label: 'About',
-                    click: () => {
-                        dialog.showMessageBox(mainWindow, {
-                            title: 'About',
-                            message: 'This is a simple Electron app to display 3D models in STL format.',
-                            buttons: ['OK']
-                        });
-                    }
+                    click: () => onAbout()
                 },
                 { type: 'separator' },
                 {
@@ -67,6 +72,38 @@ function createWindow(): void {
     Menu.setApplicationMenu(menu);
 }
 
+/**
+ * Handle the 'open-file' event from the renderer process.
+ */
+async function onOpenFile() {
+    const { canceled, filePaths } = await dialog.showOpenDialog(mainWindow!, {
+        filters: [{ name: 'STL Files', extensions: ['stl'] }],
+        properties: ['openFile']
+    });
+    if (!canceled && filePaths.length > 0) {
+        logger.info(`Selected file: ${filePaths[0]}`);
+
+        // Load STL file into memory
+        mainWindow!.webContents.send('load-stl', filePaths[0]);
+    }
+}
+
+/**
+ * Show about dialog
+ */
+function onAbout(): void {
+    dialog.showMessageBox(mainWindow!, {
+        title: 'About',
+        message: 'This is a simple Electron app to display 3D models in STL format.',
+        buttons: ['OK']
+    });
+}
+
+
+
+/**
+ * Main entry point for the Electron app.
+ */
 app.whenReady().then(() => {
     createWindow()
 
@@ -77,6 +114,9 @@ app.whenReady().then(() => {
     });
 });
 
+/**
+ * Quit when all windows are closed
+ */
 app.on('window-all-closed', () => {
     if (process.platform !== 'darwin') {
         app.quit()

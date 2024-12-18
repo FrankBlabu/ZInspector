@@ -1,3 +1,9 @@
+/*!
+ * lib.rs - Rust code for the backend
+ * 
+ * This file exposes the interface of the backebd to the node.
+ */
+
 use neon::prelude::*;
 
 fn hello(mut cx: FunctionContext) -> JsResult<JsString> {
