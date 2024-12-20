@@ -19,28 +19,20 @@ class ZInspector(zinspector_pb2_grpc.ZInspectorServicer):
     Implementation of the ZInspector service
     '''
 
-    def GetGreeting(self, request, _context):
-        log.info(f'Received request: {request}')
-        name = request.name
-        return zinspector_pb2.GreetingResponse(message=f"Hello, {name}!")
-
     def ImportMesh(self, request, context):
-        log.info(f'Import mesh: {request.path}')
+
+        path = request.path
+
+        log.info(f'Import mesh: {path}')
 
         try:
-            with open(request.path, 'rb') as f:
-                contents = f.read()
-
-            log.info(f'Loaded {len(contents)} bytes from {request.path}')
-
-            mesh = trimesh.load(contents, file_type='stl')
-
+            mesh = trimesh.load(path, file_type='stl')
         except Exception as e:
             log.error(f'Failed to load file: {e}')
             context.set_details(str(e))
             context.set_code(grpc.StatusCode.NOT_FOUND)
 
-        return zinspector_pb2.Empty()
+        return zinspector_pb2.EmptyResponse()
 
 
 def serve(port):

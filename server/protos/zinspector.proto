@@ -1,20 +1,11 @@
 syntax = "proto3";
 
 service ZInspector {
-    rpc GetGreeting (GreetingRequest) returns (GreetingResponse);
-    rpc ImportMesh (FilePathRequest) returns (Empty);
+    rpc ImportMesh (ImportMeshRequest) returns (EmptyResponse);
 }
 
-message GreetingRequest {
-    string name = 1;
-}
-
-message GreetingResponse {
-    string message = 1;
-}
-
-message FilePathRequest {
+message ImportMeshRequest {
     string path = 1;
 }
 
-message Empty {}
+message EmptyResponse {}

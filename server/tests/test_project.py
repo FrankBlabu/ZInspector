@@ -22,7 +22,7 @@ class TestProject(unittest.TestCase):
     def test_add_and_save_mesh(self):
 
         test_file = self.dir + '/test.zinspector'
-        saved_project = Project(test_file)
+        saved_project = Project()
 
         # Create a simple mesh
         mesh = trimesh.creation.box()
@@ -41,14 +41,14 @@ class TestProject(unittest.TestCase):
         saved_project.add_mesh('box', mesh)
 
         # Save the project
-        saved_project.save()
+        saved_project.save(test_file)
 
         # Verify the file was created
         self.assertTrue(os.path.exists(test_file))
 
         # Load the project
-        loaded_project = Project(test_file)
-        loaded_project.load()
+        loaded_project = Project()
+        loaded_project.load(test_file)
 
         # Verify the mesh was loaded correctly
         self.assertIn('box', loaded_project.meshes)
@@ -64,10 +64,10 @@ class TestProject(unittest.TestCase):
     def test_load_nonexistent_file(self):
         # Attempt to load a nonexistent file
 
-        project = Project('/does/not/exist.zinspector')
+        project = Project()
 
         with self.assertRaises(OSError):
-            project.load()
+            project.load('/does/not/exist.zinspector')
 
 
 if __name__ == '__main__':

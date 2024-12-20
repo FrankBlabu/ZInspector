@@ -105,10 +105,17 @@ async function onImportMesh() {
         filters: [{ name: 'STL Files', extensions: ['stl'] }],
         properties: ['openFile']
     });
+
     if (!canceled && filePaths.length > 0) {
-        AppState.server.ImportMesh({ path: filePaths[0] }, (error: any, response: any) => {
+        const path: string = filePaths[0];
+        logger.info(`Importing mesh: ${path}`);
+
+        AppState.server.ImportMesh({ path: path }, (error: any, response: any) => {
+
+            logger.info(`ImportMesh response: ${response}`);
+
             if (error) {
-                logger.error(`Error: ${error}`);
+                logger.error(error);
                 dialog.showErrorBox('Error', error);
             } else {
                 logger.info(`Model loaded`);
@@ -155,6 +162,19 @@ app.whenReady().then(() => {
         logger.info(`Python process exited with code ${code}`);
         AppState.process = null;
     });
+
+    // Ensure the child process is terminated if the application crashes
+    const terminateChildProcess = () => {
+        if (AppState.process) {
+            AppState.process.kill();
+            AppState.process = null;
+        }
+    };
+
+    process.on('exit', terminateChildProcess);
+    process.on('SIGINT', terminateChildProcess);
+    process.on('SIGTERM', terminateChildProcess);
+    process.on('uncaughtException', terminateChildProcess);
 
     // Execute when process has been started
     AppState.process.on('spawn', () => {

@@ -64,9 +64,6 @@ class CustomBuildCommand(build_py):
                     proto_file = os.path.join(root, file)
                     shutil.copy(proto_file, target_dir)
 
-        # Run the standard build process
-        super().run()
-
 
 setup(
     name="zinspector",

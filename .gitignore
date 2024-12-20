@@ -1,6 +1,7 @@
 dist/
 node_modules/
 target/
+server/build
 *.js.map
 **/__pycache__/
 .coverage
