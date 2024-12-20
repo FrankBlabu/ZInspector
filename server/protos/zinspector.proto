@@ -1,7 +1,6 @@
 syntax = "proto3";
 
-service MyService {
-    // Example method
+service ZInspector {
     rpc GetGreeting (GreetingRequest) returns (GreetingResponse);
 }
 

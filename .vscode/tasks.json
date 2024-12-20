@@ -34,9 +34,6 @@
             "label": "ZInspector: Start",
             "type": "shell",
             "command": "npm start",
-            "dependsOn": [
-                "ZInspector: Build"
-            ],
             "options": {
                 "cwd": "${workspaceFolder}",
                 "env": {}

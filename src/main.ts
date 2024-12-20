@@ -7,9 +7,14 @@
 import { app, BrowserWindow, Menu, dialog } from 'electron';
 import logger from './logging';
 import * as path from 'path';
+import { spawn, ChildProcess } from 'child_process';
+
+const grpc = require('@grpc/grpc-js');
+const protoLoader = require('@grpc/proto-loader');
 
 // Application main window
 let mainWindow: BrowserWindow | null = null;
+let server: ChildProcess | null = null;
 
 /**
  * Create the main window for the application.
@@ -84,7 +89,7 @@ async function onOpenFile() {
     }
 }
 
-/**
+/*
  * Show about dialog
  */
 async function onAbout(): Promise<void> {
@@ -96,18 +101,78 @@ async function onAbout(): Promise<void> {
     });
 }
 
-
-
 /**
  * Main entry point for the Electron app.
  */
 app.whenReady().then(() => {
+
+    const port = 55010;
+
+    //
+    // Start the Python backend
+    //    
+    logger.info('Starting Python server');
+    server = spawn('python', ['dist/server/zinspector.py', '--port', port.toString()]);
+
+    server.stdout!.on('data', (data) => {
+        logger.debug(`Python stdout: ${data}`);
+    });
+
+    server.stderr!.on('data', (data) => {
+        logger.error(`Python stderr: ${data}`);
+    });
+
+    server.on('close', (code) => {
+        logger.info(`Python process exited with code ${code}`);
+        server = null;
+    });
+
+    // Execute when process has been started
+    server.on('spawn', () => {
+
+        logger.debug(`Process spawned`);
+
+        //
+        // Connect to the gRPC server
+        //
+        const packageDefinition = protoLoader.loadSync('dist/server/zinspector.proto', {
+            keepCase: true,
+            longs: String,
+            enums: String,
+            defaults: true,
+            oneofs: true,
+        });
+
+        const protoDescriptor = grpc.loadPackageDefinition(packageDefinition);
+        const ZInspector = protoDescriptor.ZInspector;
+
+        // Connect to the gRPC server
+        const client = new ZInspector(`localhost:${port}`, grpc.credentials.createInsecure());
+
+        // Call the gRPC method
+        client.GetGreeting({ name: 'Electron' }, (error: string, response: any) => {
+
+            logger.debug('GetGreeting response:', response);
+
+            if (error) {
+                logger.error('Error:', error);
+            } else {
+                logger.info('Greeting:', response.message);
+            }
+        });
+    });
+
+
     createWindow()
 
     app.on('activate', () => {
         if (BrowserWindow.getAllWindows().length === 0) {
             createWindow();
         }
+    });
+
+    mainWindow!.on('closed', () => {
+        mainWindow = null;
     });
 });
 
