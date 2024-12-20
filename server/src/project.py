@@ -5,18 +5,20 @@
 import h5py
 import io
 import trimesh
-import typing
 
 import numpy as np
 
+from .object import Object
 
-class Project:
+
+class Project (Object):
     '''
     This object represents a project. It stored all the projects data including the
     large blobs
     '''
 
     def __init__(self):
+        super().__init__()
         self.filename = None
         self.meshes = {}
 
@@ -42,6 +44,7 @@ class Project:
             for name, mesh in self.meshes.items():
                 data = np.frombuffer(trimesh.exchange.export.export_stl(mesh), dtype=np.uint8)
                 dset = meshes.create_dataset(name, data=data)
+                dset.attrs['file_type'] = 'stl'
 
         self.filename = filename
 
@@ -56,3 +59,6 @@ class Project:
         Add a mesh to the project.
         '''
         self.meshes[name] = mesh
+
+    def __repr__(self):
+        return f'<Project filename={self.filename} meshes={list(self.meshes.keys())}, id={self.get_id()}>'
