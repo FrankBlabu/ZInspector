@@ -4,6 +4,7 @@ import argparse
 import grpc
 import logging
 import sys
+import trimesh
 
 import zinspector_pb2
 import zinspector_pb2_grpc
@@ -23,14 +24,17 @@ class ZInspector(zinspector_pb2_grpc.ZInspectorServicer):
         name = request.name
         return zinspector_pb2.GreetingResponse(message=f"Hello, {name}!")
 
-    def LoadModel(self, request, context):
-        log.info(f'Load file: {request.path}')
+    def ImportMesh(self, request, context):
+        log.info(f'Import mesh: {request.path}')
 
         try:
             with open(request.path, 'rb') as f:
                 contents = f.read()
 
             log.info(f'Loaded {len(contents)} bytes from {request.path}')
+
+            mesh = trimesh.load(contents, file_type='stl')
+
         except Exception as e:
             log.error(f'Failed to load file: {e}')
             context.set_details(str(e))

@@ -53,8 +53,12 @@ function createWindow(): void {
             label: 'File',
             submenu: [
                 {
-                    label: 'Open STL File',
-                    click: async () => onOpenFile()
+                    label: 'New project',
+                    click: async () => onNewProject()
+                },
+                {
+                    label: 'Import mesh',
+                    click: async () => onImportMesh()
                 },
                 { role: 'quit' }
             ]
@@ -83,15 +87,26 @@ function createWindow(): void {
 }
 
 /**
- * Handle the 'open-file' event from the renderer process.
+ * Handle the 'new project' event
  */
-async function onOpenFile() {
+async function onNewProject() {
+    dialog.showMessageBox(AppState.mainWindow!, {
+        title: 'New Project',
+        message: 'New project created',
+        buttons: ['OK']
+    });
+}
+
+/**
+ * Handle the 'import mesh' event
+ */
+async function onImportMesh() {
     const { canceled, filePaths } = await dialog.showOpenDialog(AppState.mainWindow!, {
         filters: [{ name: 'STL Files', extensions: ['stl'] }],
         properties: ['openFile']
     });
     if (!canceled && filePaths.length > 0) {
-        AppState.server.LoadModel({ path: filePaths[0] }, (error: any, response: any) => {
+        AppState.server.ImportMesh({ path: filePaths[0] }, (error: any, response: any) => {
             if (error) {
                 logger.error(`Error: ${error}`);
                 dialog.showErrorBox('Error', error);
@@ -162,19 +177,6 @@ app.whenReady().then(() => {
 
         // Connect to the gRPC server
         AppState.server = new ZInspector(`localhost:${port}`, grpc.credentials.createInsecure());
-
-        // Call the gRPC method
-        AppState.server.GetGreeting({ name: 'Electron' }, (error: any, response: any) => {
-
-            logger.debug(`GetGreeting response: ${response}`);
-
-            if (error) {
-                logger.error(`Error: ${error}`);
-                dialog.showErrorBox('Error', error);
-            } else {
-                logger.info(`Greeting: ${response.message}`);
-            }
-        });
     });
 
     createWindow()
