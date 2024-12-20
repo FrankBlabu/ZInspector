@@ -1,7 +1,6 @@
 
 import unittest
 import os
-import h5py
 import shutil
 import tempfile
 import trimesh
@@ -28,6 +27,16 @@ class TestProject(unittest.TestCase):
         # Create a simple mesh
         mesh = trimesh.creation.box()
 
+        n_vertices = len(mesh.vertices)
+        n_faces = len(mesh.faces)
+        n_edges = len(mesh.edges)
+        n_normals = len(mesh.face_normals)
+
+        self.assertGreater(n_vertices, 0)
+        self.assertGreater(n_faces, 0)
+        self.assertGreater(n_edges, 0)
+        self.assertGreater(n_normals, 0)
+
         # Add the mesh to the project
         saved_project.add_mesh('box', mesh)
 
@@ -43,7 +52,14 @@ class TestProject(unittest.TestCase):
 
         # Verify the mesh was loaded correctly
         self.assertIn('box', loaded_project.meshes)
-        self.assertTrue(loaded_project.meshes['box'].is_volume)
+
+        loaded_mesh = loaded_project.get_mesh('box')
+
+        self.assertTrue(loaded_mesh.is_volume)
+        self.assertEqual(n_vertices, len(loaded_mesh.vertices))
+        self.assertEqual(n_faces, len(loaded_mesh.faces))
+        self.assertEqual(n_edges, len(loaded_mesh.edges))
+        self.assertEqual(n_normals, len(loaded_mesh.face_normals))
 
     def test_load_nonexistent_file(self):
         # Attempt to load a nonexistent file

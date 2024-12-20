@@ -3,3 +3,4 @@ node_modules/
 target/
 *.js.map
 **/__pycache__/
+.coverage

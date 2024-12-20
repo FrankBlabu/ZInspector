@@ -10,7 +10,7 @@
     "build": "npm run build-server && npm run build-ui",
     "build-ui": "npx tsc",
     "build-server": "cd server && python setup.py build_py --output-dir=../dist/server",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test-server": "python -m unittest discover -s server/tests"
   },
   "author": "Frank Blankenburg",
   "license": "ISC",
