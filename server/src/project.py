@@ -17,8 +17,8 @@ class Mesh (Object):
     for manipulating it.
     '''
 
-    def __init__(self, mesh: trimesh.Trimesh):
-        super().__init__()
+    def __init__(self, name: str, mesh: trimesh.Trimesh):
+        super().__init__(name)
         self.data = mesh
 
     def __repr__(self):
@@ -31,8 +31,8 @@ class Project (Object):
     large blobs
     '''
 
-    def __init__(self):
-        super().__init__()
+    def __init__(self, name):
+        super().__init__(name)
         self.filename = None
         self.meshes = []
 

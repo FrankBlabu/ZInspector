@@ -22,10 +22,10 @@ class TestProject(unittest.TestCase):
     def test_add_and_save_mesh(self):
 
         test_file = self.dir + '/test.zinspector'
-        saved_project = Project()
+        saved_project = Project('Test project')
 
         # Create a simple mesh
-        mesh = Mesh(trimesh.creation.box())
+        mesh = Mesh('Test mesh', trimesh.creation.box())
 
         n_vertices = len(mesh.data.vertices)
         n_faces = len(mesh.data.faces)

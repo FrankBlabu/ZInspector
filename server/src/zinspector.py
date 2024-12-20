@@ -3,6 +3,7 @@ from concurrent import futures
 import argparse
 import grpc
 import logging
+import os
 import sys
 import trimesh
 
@@ -39,7 +40,7 @@ class ZInspector(zinspector_pb2_grpc.ZInspectorServicer):
         try:
             project = ObjectIdDatabase.get(request.id)
             mesh = trimesh.load(request.path, file_type='stl')
-            project.add_mesh(Mesh(mesh))
+            project.add_mesh(Mesh(os.path.basename(request.path), mesh))
 
         except Exception as e:
             log.error(f'Failed to load file: {e}')

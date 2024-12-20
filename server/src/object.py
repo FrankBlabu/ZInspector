@@ -44,9 +44,14 @@ class ObjectIdDatabase:
 class Object:
     """Base class for all objects with a unique UUID."""
 
-    def __init__(self):
+    def __init__(self, name):
         self.id = str(uuid.uuid4())  # Assign a unique UUID
+        self.name = name
         ObjectIdDatabase().add(self)  # Automatically register the object in the database
+
+    def get_name(self):
+        """Get the name of the object."""
+        return self.name
 
     def get_id(self):
         """Get the UUID of the object."""
@@ -56,4 +61,4 @@ class Object:
         ObjectIdDatabase().remove(self.id)  # Automatically deregister the object when it is destructed
 
     def __repr__(self):
-        return f'<{self.__class__.__name__} id={self.id}>'
+        return f'<{self.__class__.__name__} id={self.id}, name={self.name}>'
