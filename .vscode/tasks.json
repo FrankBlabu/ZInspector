@@ -4,91 +4,55 @@
     "version": "2.0.0",
     "tasks": [
         {
-            "label": "ZInspector: Compile backend",
+            "label": "ZInspector: Build server",
             "type": "shell",
-            "command": "cargo build",
-            "options": {
-                "cwd": "${workspaceFolder}/backend"
-            },
-            "problemMatcher": [
-                "$rustc"
-            ],
+            "command": "npm run build-server",
             "group": {
                 "kind": "build",
                 "isDefault": false
             }
         },
         {
-            "label": "ZInspector: Build backend",
+            "label": "ZInspector: Build UI",
+            "type": "shell",
+            "command": "npm run build-ui",
+            "group": {
+                "kind": "build",
+                "isDefault": false
+            }
+        },
+        {
+            "label": "ZInspector: Build",
             "type": "shell",
             "command": "npm run build",
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            }
+        },
+        {
+            "label": "ZInspector: Start",
+            "type": "shell",
+            "command": "npm start",
             "dependsOn": [
-                "ZInspector: Compile backend"
+                "ZInspector: Build"
             ],
             "options": {
-                "cwd": "${workspaceFolder}/backend"
+                "cwd": "${workspaceFolder}",
+                "env": {}
             },
-            "problemMatcher": [
-                "$rustc"
-            ],
             "group": {
                 "kind": "build",
                 "isDefault": false
             }
-        },
-        {
-            "label": "ZInspector: Build frontend",
-            "type": "shell",
-            "command": "npx tsc",
-            "options": {
-                "cwd": "${workspaceFolder}"
-            },
-            "group": {
-                "kind": "build",
-                "isDefault": false
-            },
-            "problemMatcher": []
-        },
-        {
-            "label": "ZInspector: Run",
-            "type": "shell",
-            "command": "npm start",
-            "options": {
-                "cwd": "${workspaceFolder}",
-                "env": {
-                    "RUST_LOG": "trace"
-                }
-            },
-            "group": {
-                "kind": "build",
-                "isDefault": false
-            },
-            "problemMatcher": []
         },
         {
             "label": "ZInspector: Clean",
             "type": "shell",
             "command": "npm run clean",
-            "options": {
-                "cwd": "${workspaceFolder}"
-            },
             "group": {
                 "kind": "build",
                 "isDefault": false
-            },
-            "problemMatcher": []
-        },
-        {
-            "label": "ZInspector: Build and run",
-            "dependsOn": [
-                "ZInspector: Build backend",
-                "ZInspector: Build frontend",
-                "ZInspector: Run"
-            ],
-            "dependsOrder": "sequence",
-            "group": {
-                "kind": "build",
-                "isDefault": true
             }
         }
     ]

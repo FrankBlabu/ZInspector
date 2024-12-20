@@ -1,0 +1,14 @@
+syntax = "proto3";
+
+service MyService {
+    // Example method
+    rpc GetGreeting (GreetingRequest) returns (GreetingResponse);
+}
+
+message GreetingRequest {
+    string name = 1;
+}
+
+message GreetingResponse {
+    string message = 1;
+}

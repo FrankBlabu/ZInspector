@@ -2,10 +2,14 @@
   "name": "zinspector",
   "version": "1.0.0",
   "description": "Inspection software demo prototype",
-  "main": "dist/main.js",
+  "main": "dist/ui/main.js",
   "scripts": {
     "start": "electron .",
     "clean": "rm -rf dist",
+    "rebuild": "npm run clean && npm run build",
+    "build": "npm run build-server && npm run build-ui",
+    "build-ui": "npx tsc",
+    "build-server": "cd server && python setup.py build_py --output-dir=../dist/server",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "Frank Blankenburg",
