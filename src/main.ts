@@ -8,8 +8,6 @@ import { app, BrowserWindow, Menu, dialog } from 'electron';
 import logger from './logging';
 import * as path from 'path';
 
-const backend = require('../backend');
-
 // Application main window
 let mainWindow: BrowserWindow | null = null;
 
@@ -83,12 +81,6 @@ async function onOpenFile() {
         properties: ['openFile']
     });
     if (!canceled && filePaths.length > 0) {
-        logger.info(`Loading file: ${filePaths[0]}`);
-        const data = backend.load_file(filePaths[0]);
-        logger.debug(`Loaded file: ${data.length} bytes`);
-
-        // Load STL file into memory
-        // mainWindow!.webContents.send('load-stl', filePaths[0]);
     }
 }
 
@@ -97,15 +89,11 @@ async function onOpenFile() {
  */
 async function onAbout(): Promise<void> {
 
-    const cpus = backend.get_num_cpus();
-
-    backend.
-
-        dialog.showMessageBox(mainWindow!, {
-            title: 'About',
-            message: `This is a simple Electron app to display 3D models in STL format running of a system with ${cpus} CPUs.`,
-            buttons: ['OK']
-        });
+    dialog.showMessageBox(mainWindow!, {
+        title: 'About',
+        message: `This is a simple Electron app to display 3D models in STL format.`,
+        buttons: ['OK']
+    });
 }
 
 
