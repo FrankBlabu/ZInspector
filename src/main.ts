@@ -8,6 +8,8 @@ import { app, BrowserWindow, Menu, dialog } from 'electron';
 import logger from './logging';
 import * as path from 'path';
 
+const backend = require('./backend/debnug');
+
 // Application main window
 let mainWindow: BrowserWindow | null = null;
 

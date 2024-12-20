@@ -4,9 +4,27 @@
     "version": "2.0.0",
     "tasks": [
         {
+            "label": "ZInspector: Compile backend",
+            "type": "shell",
+            "command": "cargo build",
+            "options": {
+                "cwd": "${workspaceFolder}/backend"
+            },
+            "problemMatcher": [
+                "$rustc"
+            ],
+            "group": {
+                "kind": "build",
+                "isDefault": false
+            }
+        },
+        {
             "label": "ZInspector: Build backend",
             "type": "shell",
             "command": "npm run build",
+            "dependsOn": [
+                "ZInspector: Compile backend"
+            ],
             "options": {
                 "cwd": "${workspaceFolder}/backend"
             },

@@ -1,6 +1,6 @@
 # backend
 
-**backend:** ZInspector computation backend
+**backend:** 3D model viewer backend
 
 This project was bootstrapped by [create-neon](https://www.npmjs.com/package/create-neon).
 

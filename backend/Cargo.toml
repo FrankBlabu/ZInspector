@@ -3,7 +3,7 @@ name = "backend"
 version = "0.1.0"
 description = "ZInspector computation backend"
 authors = ["Frank Blankenburg"]
-license = "ISC"
+license = "MIT"
 edition = "2021"
 exclude = ["index.node"]
 

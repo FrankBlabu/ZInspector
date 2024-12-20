@@ -1,7 +1,7 @@
 {
   "name": "backend",
   "version": "0.1.0",
-  "description": "ZInspector computation backend",
+  "description": "3D model viewer backend",
   "main": "index.node",
   "scripts": {
     "test": "cargo test",
@@ -14,11 +14,8 @@
     "cross": "npm run cross-build -- --release"
   },
   "author": "Frank Blankenburg",
-  "license": "ISC",
+  "license": "MIT",
   "devDependencies": {
     "@neon-rs/cli": "0.1.82"
-  },
-  "dependencies": {
-    "neon-cli": "^0.10.1"
   }
 }
