@@ -163,19 +163,6 @@ app.whenReady().then(() => {
         AppState.process = null;
     });
 
-    // Ensure the child process is terminated if the application crashes
-    const terminateChildProcess = () => {
-        if (AppState.process) {
-            AppState.process.kill();
-            AppState.process = null;
-        }
-    };
-
-    process.on('exit', terminateChildProcess);
-    process.on('SIGINT', terminateChildProcess);
-    process.on('SIGTERM', terminateChildProcess);
-    process.on('uncaughtException', terminateChildProcess);
-
     // Execute when process has been started
     AppState.process.on('spawn', () => {
 
