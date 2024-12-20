@@ -14,15 +14,35 @@ logging.basicConfig(level=logging.DEBUG, stream=sys.stdout)
 
 
 class ZInspector(zinspector_pb2_grpc.ZInspectorServicer):
-    def GetGreeting(self, request, context):
+    '''
+    Implementation of the ZInspector service
+    '''
+
+    def GetGreeting(self, request, _context):
         log.info(f'Received request: {request}')
         name = request.name
         return zinspector_pb2.GreetingResponse(message=f"Hello, {name}!")
 
-# Start the gRPC server
+    def LoadModel(self, request, context):
+        log.info(f'Load file: {request.path}')
+
+        try:
+            with open(request.path, 'rb') as f:
+                contents = f.read()
+
+            log.info(f'Loaded {len(contents)} bytes from {request.path}')
+        except Exception as e:
+            log.error(f'Failed to load file: {e}')
+            context.set_details(str(e))
+            context.set_code(grpc.StatusCode.NOT_FOUND)
+
+        return zinspector_pb2.Empty()
 
 
 def serve(port):
+    '''
+    Start the gRPC server and enter its main loop.
+    '''
 
     log.info("Starting server...")
 
@@ -40,8 +60,8 @@ def serve(port):
 if __name__ == "__main__":
 
     # Parse command line arguments
-    parser = argparse.ArgumentParser(description="Zinspector server")
-    parser.add_argument("--port", type=int, default=50051, help="Port to listen on")
+    parser = argparse.ArgumentParser(description="ZInspector server")
+    parser.add_argument("--port", type=int, help="Port to listen on")
 
     args = parser.parse_args()
 

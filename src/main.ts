@@ -12,9 +12,14 @@ import { spawn, ChildProcess } from 'child_process';
 const grpc = require('@grpc/grpc-js');
 const protoLoader = require('@grpc/proto-loader');
 
-// Application main window
-let mainWindow: BrowserWindow | null = null;
-let server: ChildProcess | null = null;
+/*
+ * Global application state
+ */
+namespace AppState {
+    export let mainWindow: BrowserWindow | null = null;
+    export let process: ChildProcess | null = null;
+    export let server: any = null;
+};
 
 /**
  * Create the main window for the application.
@@ -30,7 +35,7 @@ function createWindow(): void {
     // via IPC. The preload.js script is used to expose a limited set of
     // native APIs to the renderer process.
     //
-    mainWindow = new BrowserWindow({
+    AppState.mainWindow = new BrowserWindow({
         width: 800,
         height: 600,
         webPreferences: {
@@ -38,7 +43,7 @@ function createWindow(): void {
         }
     });
 
-    mainWindow.loadFile('ui/index.html');
+    AppState.mainWindow.loadFile('ui/index.html');
 
     //
     // Set up the application menu
@@ -81,11 +86,18 @@ function createWindow(): void {
  * Handle the 'open-file' event from the renderer process.
  */
 async function onOpenFile() {
-    const { canceled, filePaths } = await dialog.showOpenDialog(mainWindow!, {
+    const { canceled, filePaths } = await dialog.showOpenDialog(AppState.mainWindow!, {
         filters: [{ name: 'STL Files', extensions: ['stl'] }],
         properties: ['openFile']
     });
     if (!canceled && filePaths.length > 0) {
+        AppState.server.LoadModel({ path: filePaths[0] }, (error: any, response: any) => {
+            if (error) {
+                logger.error(`Error: ${error}`);
+            } else {
+                logger.info(`Model loaded`);
+            }
+        });
     }
 }
 
@@ -94,7 +106,7 @@ async function onOpenFile() {
  */
 async function onAbout(): Promise<void> {
 
-    dialog.showMessageBox(mainWindow!, {
+    dialog.showMessageBox(AppState.mainWindow!, {
         title: 'About',
         message: `This is a simple Electron app to display 3D models in STL format.`,
         buttons: ['OK']
@@ -112,23 +124,23 @@ app.whenReady().then(() => {
     // Start the Python backend
     //    
     logger.info('Starting Python server');
-    server = spawn('python', ['dist/server/zinspector.py', '--port', port.toString()]);
+    AppState.process = spawn('python', ['dist/server/zinspector.py', '--port', port.toString()]);
 
-    server.stdout!.on('data', (data) => {
+    AppState.process.stdout!.on('data', (data) => {
         logger.debug(`Python stdout: ${data}`);
     });
 
-    server.stderr!.on('data', (data) => {
+    AppState.process.stderr!.on('data', (data) => {
         logger.error(`Python stderr: ${data}`);
     });
 
-    server.on('close', (code) => {
+    AppState.process.on('close', (code) => {
         logger.info(`Python process exited with code ${code}`);
-        server = null;
+        AppState.process = null;
     });
 
     // Execute when process has been started
-    server.on('spawn', () => {
+    AppState.process.on('spawn', () => {
 
         logger.debug(`Process spawned`);
 
@@ -147,17 +159,17 @@ app.whenReady().then(() => {
         const ZInspector = protoDescriptor.ZInspector;
 
         // Connect to the gRPC server
-        const client = new ZInspector(`localhost:${port}`, grpc.credentials.createInsecure());
+        AppState.server = new ZInspector(`localhost:${port}`, grpc.credentials.createInsecure());
 
         // Call the gRPC method
-        client.GetGreeting({ name: 'Electron' }, (error: string, response: any) => {
+        AppState.server.GetGreeting({ name: 'Electron' }, (error: any, response: any) => {
 
-            logger.debug('GetGreeting response:', response);
+            logger.debug(`GetGreeting response: ${response}`);
 
             if (error) {
-                logger.error('Error:', error);
+                logger.error(`Error: ${error}`);
             } else {
-                logger.info('Greeting:', response.message);
+                logger.info(`Greeting: ${response.message}`);
             }
         });
     });
@@ -171,8 +183,8 @@ app.whenReady().then(() => {
         }
     });
 
-    mainWindow!.on('closed', () => {
-        mainWindow = null;
+    AppState.mainWindow!.on('closed', () => {
+        AppState.mainWindow = null;
     });
 });
 
