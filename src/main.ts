@@ -94,12 +94,14 @@ async function onOpenFile() {
         AppState.server.LoadModel({ path: filePaths[0] }, (error: any, response: any) => {
             if (error) {
                 logger.error(`Error: ${error}`);
+                dialog.showErrorBox('Error', error);
             } else {
                 logger.info(`Model loaded`);
             }
         });
     }
 }
+
 
 /*
  * Show about dialog
@@ -168,12 +170,12 @@ app.whenReady().then(() => {
 
             if (error) {
                 logger.error(`Error: ${error}`);
+                dialog.showErrorBox('Error', error);
             } else {
                 logger.info(`Greeting: ${response.message}`);
             }
         });
     });
-
 
     createWindow()
 
