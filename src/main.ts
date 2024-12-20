@@ -8,7 +8,7 @@ import { app, BrowserWindow, Menu, dialog } from 'electron';
 import logger from './logging';
 import * as path from 'path';
 
-const backend = require('./backend/debnug');
+const backend = require('../backend');
 
 // Application main window
 let mainWindow: BrowserWindow | null = null;
@@ -93,10 +93,13 @@ async function onOpenFile() {
 /**
  * Show about dialog
  */
-function onAbout(): void {
+async function onAbout(): Promise<void> {
+
+    const cpus = backend.get_num_cpus();
+
     dialog.showMessageBox(mainWindow!, {
         title: 'About',
-        message: 'This is a simple Electron app to display 3D models in STL format.',
+        message: `This is a simple Electron app to display 3D models in STL format running of a system with ${cpus} CPUs.`,
         buttons: ['OK']
     });
 }

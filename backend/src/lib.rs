@@ -1,6 +1,6 @@
 /*!
  * lib.rs - Rust code for the backend
- * 
+ *
  * This file exposes the interface of the backebd to the node.
  */
 
@@ -17,6 +17,6 @@ fn get_num_cpus(mut cx: FunctionContext) -> JsResult<JsNumber> {
 #[neon::main]
 fn main(mut cx: ModuleContext) -> NeonResult<()> {
     cx.export_function("hello", hello)?;
-    cx.export_function("get", get_num_cpus)?;
+    cx.export_function("get_num_cpus", get_num_cpus)?;
     Ok(())
 }
