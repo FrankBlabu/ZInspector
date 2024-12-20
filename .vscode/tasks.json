@@ -54,7 +54,10 @@
             "type": "shell",
             "command": "npm start",
             "options": {
-                "cwd": "${workspaceFolder}"
+                "cwd": "${workspaceFolder}",
+                "env": {
+                    "RUST_LOG": "trace"
+                }
             },
             "group": {
                 "kind": "build",
