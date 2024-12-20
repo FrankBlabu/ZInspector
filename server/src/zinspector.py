@@ -9,6 +9,8 @@ import trimesh
 import zinspector_pb2
 import zinspector_pb2_grpc
 
+from .object import ObjectIdDatabase
+from .project import Project, Mesh
 
 log = logging.getLogger(__name__)
 logging.basicConfig(level=logging.DEBUG, stream=sys.stdout)
@@ -19,14 +21,26 @@ class ZInspector(zinspector_pb2_grpc.ZInspectorServicer):
     Implementation of the ZInspector service
     '''
 
+    projects = []
+
+    def CreateProject(self, request, context):
+
+        log.info(f'Create project: {request.name}')
+
+        project = Project(request.name)
+        ZInspector.projects.append(project)
+
+        return zinspector_pb2.ObjectIdResponse(id=project.get_id())
+
     def ImportMesh(self, request, context):
 
-        path = request.path
-
-        log.info(f'Import mesh: {path}')
+        log.info(f'Import mesh: {request.id}/{request.path}')
 
         try:
-            mesh = trimesh.load(path, file_type='stl')
+            project = ObjectIdDatabase.get(request.id)
+            mesh = trimesh.load(request.path, file_type='stl')
+            project.add_mesh(Mesh(mesh))
+
         except Exception as e:
             log.error(f'Failed to load file: {e}')
             context.set_details(str(e))
