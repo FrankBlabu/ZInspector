@@ -14,6 +14,10 @@ import prompt from 'electron-prompt';
 const grpc = require('@grpc/grpc-js');
 const protoLoader = require('@grpc/proto-loader');
 
+/**********************************************************************
+ * Global data
+ */
+
 /*
  * Global application state
  */
@@ -22,6 +26,11 @@ namespace AppState {
     export let process: ChildProcess | null = null;
     export let server: any = null;
 };
+
+/**********************************************************************
+ * Main window creation
+ */
+
 
 /**
  * Create the main window for the application.
@@ -91,6 +100,10 @@ function createWindow(): void {
 
     Menu.setApplicationMenu(menu);
 }
+
+/**********************************************************************
+ * Menu handler functions
+ */
 
 /**
  * Handle the 'new project' event
@@ -197,6 +210,10 @@ function onPrintObjectTree() {
     printTree('', 0);
 }
 
+/**********************************************************************
+ * Auxiliary functions
+ */
+
 /**
  * Check if a port is free.
  * 
@@ -250,6 +267,10 @@ function handleError(error: any): void {
     }
 }
 
+/**********************************************************************
+ * Event handlers
+ */
+
 /**
  * Main entry point for the Electron app.
  */
@@ -266,12 +287,12 @@ app.whenReady().then(async () => {
 
     AppState.process.stdout!.on('data', (data: any) => {
         const text = data.toString().trim();
-        logger.debug(`[SERVER] stdout: ${text}`);
+        logger.debug(`[SERVER] ${text}`);
     });
 
     AppState.process.stderr!.on('data', (data: any) => {
         const text = data.toString().trim();
-        logger.error(`[SERVER] stderr: ${text}`);
+        logger.error(`[SERVER] ${text}`);
     });
 
     AppState.process.on('close', (code) => {

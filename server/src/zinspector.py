@@ -15,7 +15,7 @@ from elements.project import Project, Mesh
 from elements.mesh import Mesh
 
 log = logging.getLogger(__name__)
-logging.basicConfig(level=logging.DEBUG, stream=sys.stdout)
+logging.basicConfig(level=logging.DEBUG, format='%(levelname)s: %(message)s', stream=sys.stdout)
 
 
 class ZInspector(zinspector_pb2_grpc.ZInspectorServicer):
