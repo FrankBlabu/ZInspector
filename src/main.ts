@@ -188,26 +188,40 @@ async function onAbout(): Promise<void> {
 /**
  * Print object tree to console
  */
-function onPrintObjectTree() {
+async function onPrintObjectTree() {
 
-    function printTree(parent_id: string, indent: number) {
-
+    async function collectTree(parent_id: string, indent: number): Promise<string[]> {
+        const lines: string[] = [];
         const prefix = ' '.repeat(indent);
 
-        AppState.server.GetObjects({ parent: parent_id }, (error: any, response: any) => {
+        try {
+            const response = await new Promise<any>((resolve, reject) => {
+                AppState.server.GetObjects({ id: parent_id }, (error: any, response: any) => {
+                    if (error) {
+                        reject(error);
+                    } else {
+                        resolve(response);
+                    }
+                });
+            });
 
-            if (error) {
-                logger.error(error);
-            } else {
-                for (const id of response.ids) {
-                    logger.info(`${prefix}${id}`);
-                    printTree(id, indent + 4);
-                }
+
+            for (const id of response.ids) {
+                const name = await getObjectName(id);
+                lines.push(`${prefix}${name} (${id})`);
+                const childLines = await collectTree(id, indent + 4);
+                lines.push(...childLines);
             }
-        });
+        } catch (error) {
+            logger.error(error);
+        }
+
+        return lines;
     }
 
-    printTree('', 0);
+    const lines: string[] = await collectTree('', 0);
+
+    logger.debug('Object tree:\n' + lines.join('\n'));
 }
 
 /**********************************************************************
@@ -250,6 +264,21 @@ async function findFreePort(start: number, end: number): Promise<number> {
     }
     throw new Error('No free port found');
 }
+
+/**
+ * Query the name of an object
+ */
+async function getObjectName(id: string): Promise<string> {
+    return new Promise((resolve, reject) => {
+        AppState.server.GetName({ id: id }, (error: any, response: any) => {
+            if (error)
+                reject(error);
+            else
+                resolve(response.name);
+        });
+    });
+}
+
 
 /**
  * Handle an error.
