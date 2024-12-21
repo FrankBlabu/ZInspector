@@ -26,6 +26,31 @@ class ZInspector(zinspector_pb2_grpc.ZInspectorServicer):
     # Top level projects
     projects = []
 
+    def GetItems(self, request, context):
+        '''
+        Get a list of items in the project database
+        '''
+
+        log.info(f'GetItems, parent={request.id}')
+
+        ids = []
+
+        try:
+            if request.id and request.id != '':
+                parent = ObjectIdDatabase.get(request.id)
+                ids = [child.get_id() for child in parent.get_children()]
+            else:
+                ids = [project.get_id() for project in ZInspector.projects]
+
+        except Exception as e:
+            log.error(f'Failed to get items: {e}')
+            context.set_details(str(e))
+            context.set_code(grpc.StatusCode.NOT_FOUND)
+
+        log.debug(f'Result: {ids}')
+
+        return zinspector_pb2.IdResponse(ids=ids)
+
     def CreateProject(self, request, context):
 
         log.info(f'Create project: {request.name}')
@@ -33,23 +58,26 @@ class ZInspector(zinspector_pb2_grpc.ZInspectorServicer):
         project = Project(request.name)
         ZInspector.projects.append(project)
 
-        return zinspector_pb2.ObjectIdResponse(id=project.get_id())
+        return zinspector_pb2.IdResponse(ids=[project.get_id()])
 
     def ImportMesh(self, request, context):
 
         log.info(f'Import mesh: {request.id}/{request.path}')
 
+        ids = []
+
         try:
             project = ObjectIdDatabase.get(request.id)
             mesh = trimesh.load(request.path, file_type='stl')
             project.add_mesh(Mesh(os.path.basename(request.path), mesh))
+            ids = [mesh.get_id()]
 
         except Exception as e:
             log.error(f'Failed to load file: {e}')
             context.set_details(str(e))
             context.set_code(grpc.StatusCode.NOT_FOUND)
 
-        return zinspector_pb2.EmptyResponse()
+        return zinspector_pb2.IdResponse(ids=ids)
 
 
 def serve(port):

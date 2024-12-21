@@ -8,6 +8,7 @@ import { app, BrowserWindow, Menu, dialog } from 'electron';
 import logger from './logging';
 import * as path from 'path';
 import { spawn, ChildProcess } from 'child_process';
+import prompt from 'electron-prompt';
 
 const grpc = require('@grpc/grpc-js');
 const protoLoader = require('@grpc/proto-loader');
@@ -76,6 +77,10 @@ function createWindow(): void {
                     role: 'reload'
                 },
                 {
+                    label: 'Print object tree',
+                    click: () => onPrintObjectTree()
+                },
+                {
                     label: 'Toggle Developer Tools',
                     role: 'toggleDevTools'
                 }
@@ -90,11 +95,30 @@ function createWindow(): void {
  * Handle the 'new project' event
  */
 async function onNewProject() {
-    dialog.showMessageBox(AppState.mainWindow!, {
-        title: 'New Project',
-        message: 'New project created',
-        buttons: ['OK']
-    });
+
+    try {
+        const name = await prompt({
+            title: 'Create new project',
+            label: 'Project name:',
+            inputAttrs: {
+                type: 'text'
+            },
+            type: 'input'
+        });
+
+        if (name !== null) {
+
+            AppState.server.CreateProject({ name: name }, (error: any, response: any) => {
+
+                if (error)
+                    throw error;
+
+                logger.info(`Project created, ids=${response.ids}`);
+            });
+        }
+    } catch (error) {
+        logger.error(error);
+    }
 }
 
 /**
@@ -118,7 +142,7 @@ async function onImportMesh() {
                 logger.error(error);
                 dialog.showErrorBox('Error', error);
             } else {
-                logger.info(`Model loaded`);
+                logger.info(`Mesh created, id=${response.ids}`);
             }
         });
     }
@@ -135,6 +159,31 @@ async function onAbout(): Promise<void> {
         message: `This is a simple Electron app to display 3D models in STL format.`,
         buttons: ['OK']
     });
+}
+
+/**
+ * Print object tree to console
+ */
+function onPrintObjectTree() {
+
+    function printTree(parent_id: string, indent: number) {
+
+        const prefix = ' '.repeat(indent);
+
+        AppState.server.GetItems({ parent: parent_id }, (error: any, response: any) => {
+
+            if (error) {
+                logger.error(error);
+            } else {
+                for (const id of response.ids) {
+                    logger.info(`${prefix}${id}`);
+                    printTree(id, indent + 4);
+                }
+            }
+        });
+    }
+
+    printTree('', 0);
 }
 
 /**

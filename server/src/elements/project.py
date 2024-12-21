@@ -29,6 +29,12 @@ class Project (Object):
         self.filename = None
         self.meshes = []
 
+    def get_children(self):
+        '''
+        Get the children of this project.
+        '''
+        return self.meshes
+
     def load(self, filename: str):
         '''
         Load the project data from disk.
@@ -60,8 +66,8 @@ class Project (Object):
 
             meshes = f.create_group('meshes')
             for mesh in self.meshes:
-                group = meshes.create_group(mesh.get_id())
-                mesh.__save__(group)
+                mesh_group = meshes.create_group(mesh.get_id())
+                mesh.__save__(mesh_group)
 
         self.filename = filename
 

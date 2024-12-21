@@ -1,21 +1,27 @@
 syntax = "proto3";
 
 service ZInspector {
-    rpc CreateProject (CreateProjectRequest) returns (ObjectIdResponse);
-    rpc ImportMesh (ImportMeshRequest) returns (EmptyResponse);    
+    rpc GetItems (GetItemsRequest) returns (IdResponse);
+
+    rpc CreateProject (CreateProjectRequest) returns (IdResponse);
+    rpc ImportMesh (ImportMeshRequest) returns (IdResponse);    
+}
+
+message GetItemsRequest {
+    string id = 1;
 }
 
 message CreateProjectRequest {
     string name = 1;
 }
 
-message ObjectIdResponse {
-    string id = 1;
-}
-
 message ImportMeshRequest {
     string id = 1;
     string path = 2;
+}
+
+message IdResponse {
+    repeated string ids = 1;
 }
 
 message EmptyResponse {}
