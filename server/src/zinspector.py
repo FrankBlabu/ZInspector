@@ -26,12 +26,12 @@ class ZInspector(zinspector_pb2_grpc.ZInspectorServicer):
     # Top level projects
     projects = []
 
-    def GetItems(self, request, context):
+    def GetObjects(self, request, context):
         '''
-        Get a list of items in the project database
+        Get a list of objects in the project database
         '''
 
-        log.info(f'GetItems, parent={request.id}')
+        log.info(f'GetObjects, parent={request.id}')
 
         ids = []
 
@@ -43,41 +43,69 @@ class ZInspector(zinspector_pb2_grpc.ZInspectorServicer):
                 ids = [project.get_id() for project in ZInspector.projects]
 
         except Exception as e:
-            log.error(f'Failed to get items: {e}')
-            context.set_details(str(e))
-            context.set_code(grpc.StatusCode.NOT_FOUND)
+            self.__handle_exception__(e, context, grpc.StatusCode.NOT_FOUND)
 
         log.debug(f'Result: {ids}')
 
         return zinspector_pb2.IdResponse(ids=ids)
 
+    def GetName(self, request, context):
+        '''
+        Get the name of an object
+        '''
+
+        log.info(f'GetName: {request.id}')
+
+        name = ''
+
+        try:
+            obj = ObjectIdDatabase.get(request.id)
+            name = obj.get_name()
+        except Exception as e:
+            self.__handle_exception__(e, context, grpc.StatusCode.NOT_FOUND)
+
+        return zinspector_pb2.NameResponse(name=name)
+
     def CreateProject(self, request, context):
+        '''
+        Create a new project
+        '''
 
         log.info(f'Create project: {request.name}')
 
-        project = Project(request.name)
-        ZInspector.projects.append(project)
+        try:
+            project = Project(request.name)
+            ZInspector.projects.append(project)
+        except Exception as e:
+            self.__handle_exception__(e, context, grpc.StatusCode.NOT_FOUND)
 
         return zinspector_pb2.IdResponse(ids=[project.get_id()])
 
     def ImportMesh(self, request, context):
+        '''
+        Import a mesh from a file into a project
+        '''
 
-        log.info(f'Import mesh: {request.id}/{request.path}')
+        log.info(f'Import mesh: {request.project}/{request.path}')
 
         ids = []
 
         try:
-            project = ObjectIdDatabase.get(request.id)
-            mesh = trimesh.load(request.path, file_type='stl')
-            project.add_mesh(Mesh(os.path.basename(request.path), mesh))
+            project = ObjectIdDatabase.get(request.project)
+            data = trimesh.load(request.path, file_type='stl')
+            mesh = Mesh(os.path.basename(request.path), data)
+            project.add_mesh(mesh)
             ids = [mesh.get_id()]
 
         except Exception as e:
-            log.error(f'Failed to load file: {e}')
-            context.set_details(str(e))
-            context.set_code(grpc.StatusCode.NOT_FOUND)
+            self.__handle_exception__(e, context, grpc.StatusCode.NOT_FOUND)
 
         return zinspector_pb2.IdResponse(ids=ids)
+
+    def __handle_exception__(self, e, context, status=grpc.StatusCode.UNKNOWN):
+        log.error(f'{e}')
+        context.set_details(str(e))
+        context.set_code(status)
 
 
 def serve(port):
@@ -107,3 +135,5 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     serve(args.port)
+
+    log.info('Service stopped')

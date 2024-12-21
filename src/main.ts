@@ -97,28 +97,27 @@ function createWindow(): void {
  */
 async function onNewProject() {
 
-    try {
-        const name = await prompt({
-            title: 'Create new project',
-            label: 'Project name:',
-            inputAttrs: {
-                type: 'text'
-            },
-            type: 'input'
+    const name = await prompt({
+        title: 'Create new project',
+        label: 'Project name:',
+        inputAttrs: {
+            type: 'text'
+        },
+        type: 'input'
+    });
+
+    if (name !== null) {
+
+        logger.info(`Creating new project: ${name}`);
+
+        AppState.server.CreateProject({ name: name }, (error: any, response: any) => {
+            if (error)
+                handleError(error);
+            else {
+                const ids = response.ids;
+                logger.info(`Project created, ids=${ids}`);
+            }
         });
-
-        if (name !== null) {
-
-            AppState.server.CreateProject({ name: name }, (error: any, response: any) => {
-
-                if (error)
-                    throw error;
-
-                logger.info(`Project created, ids=${response.ids}`);
-            });
-        }
-    } catch (error) {
-        logger.error(error);
     }
 }
 
@@ -126,6 +125,7 @@ async function onNewProject() {
  * Handle the 'import mesh' event
  */
 async function onImportMesh() {
+
     const { canceled, filePaths } = await dialog.showOpenDialog(AppState.mainWindow!, {
         filters: [{ name: 'STL Files', extensions: ['stl'] }],
         properties: ['openFile']
@@ -135,15 +135,25 @@ async function onImportMesh() {
         const path: string = filePaths[0];
         logger.info(`Importing mesh: ${path}`);
 
-        AppState.server.ImportMesh({ path: path }, (error: any, response: any) => {
+        AppState.server.GetObjects({ parent: '' }, (error: any, response: any) => {
+            const { ids } = response;
 
-            logger.info(`ImportMesh response: ${response}`);
+            if (error)
+                handleError(error);
+            else if (ids.length === 0)
+                handleError('No projects found');
+            else {
+                logger.debug(`Projects: ${ids}, path: ${path}`);
 
-            if (error) {
-                logger.error(error);
-                dialog.showErrorBox('Error', error);
-            } else {
-                logger.info(`Mesh created, id=${response.ids}`);
+                AppState.server.ImportMesh({ project: ids[0], path: path }, (error: any, response: any) => {
+                    const { ids } = response;
+
+                    if (error)
+                        handleError(error);
+                    else {
+                        logger.info(`Mesh created, id=${ids}`);
+                    }
+                });
             }
         });
     }
@@ -171,7 +181,7 @@ function onPrintObjectTree() {
 
         const prefix = ' '.repeat(indent);
 
-        AppState.server.GetItems({ parent: parent_id }, (error: any, response: any) => {
+        AppState.server.GetObjects({ parent: parent_id }, (error: any, response: any) => {
 
             if (error) {
                 logger.error(error);
@@ -189,6 +199,9 @@ function onPrintObjectTree() {
 
 /**
  * Check if a port is free.
+ * 
+ * @param port The port to check
+ * @returns True if the port is free, false otherwise
  */
 async function isPortFree(port: number): Promise<boolean> {
     return new Promise((resolve) => {
@@ -207,6 +220,10 @@ async function isPortFree(port: number): Promise<boolean> {
 
 /**
  * Find a free port.
+ * 
+ * @param start The start port
+ * @param end The end port
+ * @returns The free port
  */
 async function findFreePort(start: number, end: number): Promise<number> {
     for (let port = start; port <= end; port++) {
@@ -215,6 +232,22 @@ async function findFreePort(start: number, end: number): Promise<number> {
         }
     }
     throw new Error('No free port found');
+}
+
+/**
+ * Handle an error.
+ * 
+ * @param error The error to handle
+ */
+function handleError(error: any): void {
+    if (error instanceof Error) {
+        logger.error(error.message);
+        dialog.showErrorBox('Error', error.message);
+    }
+    else {
+        logger.error(error);
+        dialog.showErrorBox('Error', error);
+    }
 }
 
 /**
@@ -231,12 +264,14 @@ app.whenReady().then(async () => {
 
     AppState.process = spawn('python', ['dist/server/zinspector.py', '--port', port.toString()]);
 
-    AppState.process.stdout!.on('data', (data) => {
-        logger.debug(`[SERVER] stdout: ${data}`);
+    AppState.process.stdout!.on('data', (data: any) => {
+        const text = data.toString().trim();
+        logger.debug(`[SERVER] stdout: ${text}`);
     });
 
-    AppState.process.stderr!.on('data', (data) => {
-        logger.error(`[SERVER] stderr: ${data}`);
+    AppState.process.stderr!.on('data', (data: any) => {
+        const text = data.toString().trim();
+        logger.error(`[SERVER] stderr: ${text}`);
     });
 
     AppState.process.on('close', (code) => {

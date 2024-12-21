@@ -1,14 +1,28 @@
 syntax = "proto3";
 
+/*
+ * ZInspector service definition
+ *
+ * This service is used to interact with the ZInspector server. The ZInspector
+ * server is the backend of the application, will keep and admninistrate all
+ * the data and provide a set of data manipulation operations.
+ *
+ * The service can address server side objects like projects, meshes, etc.
+ * by id. Each id is a uuid.
+ */
 service ZInspector {
-    rpc GetItems (GetItemsRequest) returns (IdResponse);
 
+    // Return the list of subitems of and item. If the given parent item
+    // is empty, the list of projects will be returned. All returned values
+    // are item ids (uuids).
+    rpc GetObjects (IdRequest) returns (IdResponse);
+    rpc GetName (IdRequest) returns (NameResponse);
+
+    // Create a new project with the given name
     rpc CreateProject (CreateProjectRequest) returns (IdResponse);
-    rpc ImportMesh (ImportMeshRequest) returns (IdResponse);    
-}
 
-message GetItemsRequest {
-    string id = 1;
+    // Import mesh into a project
+    rpc ImportMesh (ImportMeshRequest) returns (IdResponse);    
 }
 
 message CreateProjectRequest {
@@ -16,12 +30,29 @@ message CreateProjectRequest {
 }
 
 message ImportMeshRequest {
-    string id = 1;
+    string project = 1;
     string path = 2;
 }
 
+/*
+ * Generic request of calls that require an id.
+ */
+message IdRequest {
+    string id = 1;
+}
+
+/*
+ * Generic response of calls that return one or more items.
+ */
 message IdResponse {
     repeated string ids = 1;
 }
+
+/*
+ * Generic response of calls that return a name.
+ */
+ message NameResponse {
+    string name = 1;
+ }
 
 message EmptyResponse {}
