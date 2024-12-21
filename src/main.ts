@@ -8,6 +8,7 @@ import { app, BrowserWindow, Menu, dialog } from 'electron';
 import logger from './logging';
 import * as path from 'path';
 import { spawn, ChildProcess } from 'child_process';
+import * as net from 'net';
 import prompt from 'electron-prompt';
 
 const grpc = require('@grpc/grpc-js');
@@ -187,24 +188,55 @@ function onPrintObjectTree() {
 }
 
 /**
+ * Check if a port is free.
+ */
+async function isPortFree(port: number): Promise<boolean> {
+    return new Promise((resolve) => {
+        const server = net.createServer();
+        server.once('error', (err: Error) => {
+            resolve(false);
+        });
+        server.once('listening', () => {
+            server.close(() => {
+                resolve(true);
+            });
+        });
+        server.listen(port);
+    });
+}
+
+/**
+ * Find a free port.
+ */
+async function findFreePort(start: number, end: number): Promise<number> {
+    for (let port = start; port <= end; port++) {
+        if (await isPortFree(port)) {
+            return port;
+        }
+    }
+    throw new Error('No free port found');
+}
+
+/**
  * Main entry point for the Electron app.
  */
-app.whenReady().then(() => {
+app.whenReady().then(async () => {
 
-    const port = 55010;
+    const port = await findFreePort(55000, 55050);
 
     //
     // Start the Python backend
     //    
-    logger.info('Starting Python server');
+    logger.info(`Starting Python server at port ${port}`);
+
     AppState.process = spawn('python', ['dist/server/zinspector.py', '--port', port.toString()]);
 
     AppState.process.stdout!.on('data', (data) => {
-        logger.debug(`Python stdout: ${data}`);
+        logger.debug(`[SERVER] stdout: ${data}`);
     });
 
     AppState.process.stderr!.on('data', (data) => {
-        logger.error(`Python stderr: ${data}`);
+        logger.error(`[SERVER] stderr: ${data}`);
     });
 
     AppState.process.on('close', (code) => {
