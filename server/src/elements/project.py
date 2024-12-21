@@ -9,20 +9,7 @@ import trimesh
 import numpy as np
 
 from .object import Object
-
-
-class Mesh (Object):
-    '''
-    This object represents a mesh. It stores the mesh data and provides methods
-    for manipulating it.
-    '''
-
-    def __init__(self, name: str, mesh: trimesh.Trimesh):
-        super().__init__(name)
-        self.data = mesh
-
-    def __repr__(self):
-        return f'<Mesh id={self.get_id()}>'
+from .mesh import Mesh
 
 
 class Project (Object):
@@ -32,6 +19,12 @@ class Project (Object):
     '''
 
     def __init__(self, name):
+        """
+        Initialize a new Project instance.
+
+        Args:
+            name (str): The name of the project.
+        """
         super().__init__(name)
         self.filename = None
         self.meshes = []
@@ -43,8 +36,15 @@ class Project (Object):
         self.meshes = []
 
         with h5py.File(filename, 'r') as f:
-            for id, data in f['meshes'].items():
-                self.meshes.append(Mesh(trimesh.load(io.BytesIO(data[:]), file_type='stl')))
+
+            project_group = f['project']
+            super().__load__(project_group)
+
+            meshes = f['meshes']
+            for _, group in meshes.items():
+                mesh = Mesh('', None)
+                mesh.__load__(group)
+                self.meshes.append(mesh)
 
         self.filename = filename
 
@@ -54,11 +54,14 @@ class Project (Object):
         '''
 
         with h5py.File(filename, 'w') as f:
+
+            project_group = f.create_group('project')
+            super().__save__(project_group)
+
             meshes = f.create_group('meshes')
             for mesh in self.meshes:
-                data = np.frombuffer(trimesh.exchange.export.export_stl(mesh.data), dtype=np.uint8)
-                dset = meshes.create_dataset(name=mesh.get_id(), data=data)
-                dset.attrs['file_type'] = 'stl'
+                group = meshes.create_group(mesh.get_id())
+                mesh.__save__(group)
 
         self.filename = filename
 

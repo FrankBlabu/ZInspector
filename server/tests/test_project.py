@@ -5,7 +5,8 @@ import shutil
 import tempfile
 import trimesh
 
-from server.src.project import Project, Mesh
+from server.src.elements.project import Project
+from server.src.elements.mesh import Mesh
 
 
 class TestProject(unittest.TestCase):
@@ -47,7 +48,7 @@ class TestProject(unittest.TestCase):
         self.assertTrue(os.path.exists(test_file))
 
         # Load the project
-        loaded_project = Project()
+        loaded_project = Project(None)
         loaded_project.load(test_file)
 
         # Verify the mesh was loaded correctly
@@ -64,7 +65,7 @@ class TestProject(unittest.TestCase):
     def test_load_nonexistent_file(self):
         # Attempt to load a nonexistent file
 
-        project = Project()
+        project = Project(None)
 
         with self.assertRaises(OSError):
             project.load('/does/not/exist.zinspector')

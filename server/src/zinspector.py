@@ -10,8 +10,9 @@ import trimesh
 import zinspector_pb2
 import zinspector_pb2_grpc
 
-from .object import ObjectIdDatabase
-from .project import Project, Mesh
+from elements.object import ObjectIdDatabase
+from elements.project import Project, Mesh
+from elements.mesh import Mesh
 
 log = logging.getLogger(__name__)
 logging.basicConfig(level=logging.DEBUG, stream=sys.stdout)
@@ -22,6 +23,7 @@ class ZInspector(zinspector_pb2_grpc.ZInspectorServicer):
     Implementation of the ZInspector service
     '''
 
+    # Top level projects
     projects = []
 
     def CreateProject(self, request, context):

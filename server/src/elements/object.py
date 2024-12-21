@@ -2,8 +2,11 @@
 # object.py - Object management
 #
 
+import h5py
 import uuid
 import weakref
+
+from abc import ABC, abstractmethod
 
 
 class ObjectIdDatabase:
@@ -62,3 +65,15 @@ class Object:
 
     def __repr__(self):
         return f'<{self.__class__.__name__} id={self.id}, name={self.name}>'
+
+    @abstractmethod
+    def __load__(self, parent: h5py.Group):
+        """Load the object from an HDF5 group."""
+        # The id is not loaded so that all objects are truely unique in the application.
+        self.name = parent.attrs['name']
+
+    @abstractmethod
+    def __save__(self, parent: h5py.Group):
+        """Save the object to an HDF5 group."""
+        parent.attrs['id'] = self.id  # Stored for informational purposes only. Will be ignored on load.
+        parent.attrs['name'] = self.name

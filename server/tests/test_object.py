@@ -1,5 +1,7 @@
 import unittest
-from server.src.object import Object, ObjectIdDatabase
+from server.src.elements.object import Object, ObjectIdDatabase
+import tempfile
+import pickle
 
 
 class TestObjectIdDatabase(unittest.TestCase):
