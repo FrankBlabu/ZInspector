@@ -267,6 +267,28 @@ function handleError(error: any): void {
     }
 }
 
+/**
+ * Log line from server according to its level
+ */
+function logServerLine(text: string) {
+
+    const lines = text.split('\n').filter((line: string) => line.length > 0);
+    for (let line of lines) {
+        line = line.trim();
+
+        if (line.startsWith('INFO: '))
+            logger.info(`[SERVER] ${line.substring(6)}`);
+        else if (line.startsWith('WARNING: '))
+            logger.warn(`[SERVER] ${line.substring(9)}`);
+        else if (line.startsWith('ERROR: '))
+            logger.error(`[SERVER] ${line.substring(7)}`);
+        else if (line.startsWith('DEBUG: '))
+            logger.debug(`[SERVER] ${line.substring(7)}`);
+        else
+            logger.debug(`[SERVER] ${line}`);
+    }
+}
+
 /**********************************************************************
  * Event handlers
  */
@@ -286,13 +308,11 @@ app.whenReady().then(async () => {
     AppState.process = spawn('python', ['dist/server/zinspector.py', '--port', port.toString()]);
 
     AppState.process.stdout!.on('data', (data: any) => {
-        const text = data.toString().trim();
-        logger.debug(`[SERVER] ${text}`);
+        logServerLine(data.toString());
     });
 
     AppState.process.stderr!.on('data', (data: any) => {
-        const text = data.toString().trim();
-        logger.error(`[SERVER] ${text}`);
+        logServerLine(data.toString());
     });
 
     AppState.process.on('close', (code) => {
