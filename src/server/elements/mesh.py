@@ -7,7 +7,6 @@ import io
 import numpy as np
 import trimesh
 
-from abc import ABC, abstractmethod
 from .object import Object
 
 
@@ -20,9 +19,6 @@ class Mesh (Object):
     def __init__(self, name: str, data: trimesh.Trimesh):
         super().__init__(name)
         self.data = data
-
-    def __repr__(self):
-        return f'<Mesh id={self.get_id()}>'
 
     def __load__(self, parent: h5py.Group):
         super().__load__(parent)
@@ -37,3 +33,6 @@ class Mesh (Object):
         data = np.frombuffer(trimesh.exchange.export.export_stl(self.data), dtype=np.uint8)
         dset = parent.create_dataset('data', data=data)
         dset.attrs['file_type'] = 'stl'
+
+    def __repr__(self):
+        return f'<Mesh id={self.get_id()}>'

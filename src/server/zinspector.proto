@@ -15,6 +15,7 @@ service ZInspector {
     // Return the list of subitems of and item. If the given parent item
     // is empty, the list of projects will be returned. All returned values
     // are item ids (uuids).
+    rpc GetObjectTree (IdRequest) returns (JSONResponse);
     rpc GetObjects (IdRequest) returns (IdResponse);
     rpc GetName (IdRequest) returns (NameResponse);
 
@@ -54,5 +55,12 @@ message IdResponse {
  message NameResponse {
     string name = 1;
  }
+
+/*
+ * Generic response of calls that return a JSON object.
+ */
+message JSONResponse {
+    string json = 1;
+}
 
 message EmptyResponse {}

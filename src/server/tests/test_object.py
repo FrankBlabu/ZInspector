@@ -15,7 +15,6 @@ class MockObject (Object):
         super ().__save__(parent)
 
 
-
 class TestObjectIdDatabase(unittest.TestCase):
 
     def setUp(self):

@@ -190,39 +190,16 @@ async function onAbout(): Promise<void> {
  */
 async function onPrintObjectTree() {
 
-    async function collectTree(parent_id: string, indent: number): Promise<string[]> {
-        const lines: string[] = [];
-        const prefix = ' '.repeat(indent);
-
-        try {
-            const response = await new Promise<any>((resolve, reject) => {
-                AppState.server.GetObjects({ id: parent_id }, (error: any, response: any) => {
-                    if (error) {
-                        reject(error);
-                    } else {
-                        resolve(response);
-                    }
-                });
-            });
-
-
-            for (const id of response.ids) {
-                const name = await getObjectName(id);
-                lines.push(`${prefix}${name} (${id})`);
-                const childLines = await collectTree(id, indent + 4);
-                lines.push(...childLines);
-            }
-        } catch (error) {
-            logger.error(error);
+    AppState.server.GetObjectTree({ id: '' }, (error: any, response: any) => {
+        if (error) {
+            handleError(error);
+        } else {
+            const tree = JSON.parse(response.json);
+            logger.debug(`Object tree:\n` + JSON.stringify(tree, null, 2));
         }
-
-        return lines;
-    }
-
-    const lines: string[] = await collectTree('', 0);
-
-    logger.debug('Object tree:\n' + lines.join('\n'));
+    });
 }
+
 
 /**********************************************************************
  * Auxiliary functions

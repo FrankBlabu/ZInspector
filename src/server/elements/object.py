@@ -68,6 +68,10 @@ class Object (ABC):
     def __repr__(self):
         return f'<{self.__class__.__name__} id={self.id}, name={self.name}>'
 
+    def __type__(self):
+        """Get the type of the object."""
+        return self.__class__.__name__
+
     @abstractmethod
     def __load__(self, parent: h5py.Group):
         """Load the object from an HDF5 group."""
