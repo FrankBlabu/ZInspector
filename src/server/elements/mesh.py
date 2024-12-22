@@ -24,14 +24,12 @@ class Mesh (Object):
     def __repr__(self):
         return f'<Mesh id={self.get_id()}>'
 
-    @abstractmethod
     def __load__(self, parent: h5py.Group):
         super().__load__(parent)
 
         dset = parent['data']
         self.data = trimesh.load(io.BytesIO(dset[:]), file_type=dset.attrs['file_type'])
 
-    @abstractmethod
     def __save__(self, parent: h5py.Group):
         """Save the object to an HDF5 group."""
         super().__save__(parent)

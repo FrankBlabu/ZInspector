@@ -3,10 +3,6 @@
 #
 
 import h5py
-import io
-import trimesh
-
-import numpy as np
 
 from .object import Object
 from .mesh import Mesh
@@ -77,5 +73,11 @@ class Project (Object):
         '''
         self.meshes.append(mesh)
 
+    def __load__(self, parent: h5py.Group):
+        super ().__load__(parent)
+
+    def __save__(self, parent: h5py.Group):
+        super ().__save__(parent)
+    
     def __repr__(self):
         return f'<Project filename={self.filename} #meshes={len(self.meshes)}, id={self.get_id()}>'

@@ -41,7 +41,7 @@ class ObjectIdDatabase:
         return {obj_id: obj_ref() for obj_id, obj_ref in ObjectIdDatabase._storage.items() if obj_ref() is not None}
 
 
-class Object:
+class Object (ABC):
     """Base class for all objects with a unique UUID."""
 
     def __init__(self, name):
