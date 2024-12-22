@@ -7,9 +7,11 @@
     "build-server": "cd src/server && python setup.py build_py --output-dir=../../dist/server",
     "build-app": "npx tsc",
     "build-assets": "cp -r src/assets dist/app",
+    "build-ui": "cd src/ui && npm run build",
     "build": "npm run build-server && npm run build-app && npm run build-assets",
     "rebuild": "npm run clean && npm run build",
     "clean": "rm -rf dist",
+    "start-ui": "cd src/ui && npm run dev",
     "start": "electron .",
     "test-server": "cd src/server && python -m unittest discover"
   },

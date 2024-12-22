@@ -54,7 +54,15 @@ function createWindow(): void {
         }
     });
 
-    AppState.mainWindow.loadFile(path.join(__dirname, 'assets/index.html'));
+    if (true) {
+        const uiPort = process.env.UI_PORT || 51000;
+        logger.info(`Loading UI from http://localhost:${uiPort}`);
+        AppState.mainWindow!.loadURL(`http://localhost:${uiPort}`);
+    }
+    else {
+        logger.info(`Loading UI from file`);
+        AppState.mainWindow!.loadFile(path.join(__dirname, 'assets/index.html'));
+    }
 
     //
     // Set up the application menu
