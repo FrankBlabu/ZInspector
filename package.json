@@ -1,15 +1,16 @@
 {
   "name": "zinspector",
-  "version": "1.0.0",
+  "version": "0.0.1",
   "description": "Inspection software demo prototype",
-  "main": "dist/ui/main.js",
+  "main": "dist/app/main.js",
   "scripts": {
-    "start": "electron .",
-    "clean": "rm -rf dist",
+    "build-server": "cd src/server && python setup.py build_py --output-dir=../../dist/server",
+    "build-app": "npx tsc",
+    "build-assets": "cp -r src/assets dist/app",
+    "build": "npm run build-server && npm run build-app && npm run build-assets",
     "rebuild": "npm run clean && npm run build",
-    "build": "npm run build-server && npm run build-ui",
-    "build-ui": "npx tsc",
-    "build-server": "cd server && python setup.py build_py --output-dir=../dist/server",
+    "clean": "rm -rf dist",
+    "start": "electron .",
     "test-server": "python -m unittest discover -s server/tests"
   },
   "author": "Frank Blankenburg",
@@ -20,6 +21,8 @@
     "@types/node": "^22.10.1",
     "electron": "^33.2.1",
     "electron-prompt": "^1.7.0",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0",
     "typescript": "^5.7.2"
   },
   "dependencies": {

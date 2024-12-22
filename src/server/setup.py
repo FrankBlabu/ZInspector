@@ -23,21 +23,19 @@ class CustomBuildCommand(build_py):
             self.output_dir = "dist"
 
     def run(self):
-        src_dir = "src"  # Directory containing your Python source files
-        proto_dir = "protos"  # Directory containing your .proto files
+        src_dir = "."  # Directory containing your Python source files
 
         os.makedirs(self.output_dir, exist_ok=True)
 
         # Step 1: Compile .proto files into gRPC Python files
-        for proto_file in os.listdir(proto_dir):
-            if proto_file.endswith(".proto"):
-                proto_path = os.path.join(proto_dir, proto_file)
+        for file in os.listdir(src_dir):
+            if file.endswith(".proto"):
                 protoc_command = [
                     "grpc_tools.protoc",
-                    f"--proto_path={proto_dir}",
+                    f"--proto_path={src_dir}",
                     f"--python_out={self.output_dir}",
                     f"--grpc_python_out={self.output_dir}",
-                    proto_path,
+                    os.path.join(src_dir, file)
                 ]
                 if protoc.main(protoc_command) != 0:
                     raise RuntimeError(f"Failed to compile {proto_file}")
@@ -49,20 +47,9 @@ class CustomBuildCommand(build_py):
             os.makedirs(target_dir, exist_ok=True)
 
             for file in files:
-                if file.endswith(".py"):
+                if file.endswith(".py") or file.endswith(".proto"):
                     src_file = os.path.join(root, file)
                     shutil.copy(src_file, target_dir)
-
-        # Step 3: Copy proto files to the output directory
-        for root, _, files in os.walk(proto_dir):
-            rel_path = os.path.relpath(root, proto_dir)
-            target_dir = os.path.join(self.output_dir, rel_path)
-            os.makedirs(target_dir, exist_ok=True)
-
-            for file in files:
-                if file.endswith(".proto"):
-                    proto_file = os.path.join(root, file)
-                    shutil.copy(proto_file, target_dir)
 
 
 setup(

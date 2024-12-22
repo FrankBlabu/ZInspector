@@ -54,7 +54,7 @@ function createWindow(): void {
         }
     });
 
-    AppState.mainWindow.loadFile('ui/index.html');
+    AppState.mainWindow.loadFile(path.join(__dirname, 'assets/index.html'));
 
     //
     // Set up the application menu
@@ -327,14 +327,20 @@ function logServerLine(text: string) {
  */
 app.whenReady().then(async () => {
 
-    const port = await findFreePort(55000, 55050);
+    const port = await findFreePort(55000, 55100);
 
     //
     // Start the Python backend
     //    
     logger.info(`Starting Python server at port ${port}`);
 
-    AppState.process = spawn('python', ['dist/server/zinspector.py', '--port', port.toString()]);
+    try {
+        AppState.process = spawn('python', ['dist/server/zinspector.py', '--port', port.toString()]);
+    } catch (error) {
+        handleError(error);
+        app.quit();
+        return;
+    }
 
     AppState.process.stdout!.on('data', (data: any) => {
         logServerLine(data.toString());
@@ -344,8 +350,18 @@ app.whenReady().then(async () => {
         logServerLine(data.toString());
     });
 
-    AppState.process.on('close', (code) => {
-        logger.info(`Python process exited with code ${code}`);
+    AppState.process.on('close', (code: number | null) => {
+        logger.info(`Python process closed with code '${code}'`);
+        AppState.process = null;
+    });
+
+    AppState.process.on('error', (error) => {
+        handleError(error);
+        app.quit();
+    });
+
+    AppState.process.on('exit', (code: number, signal: NodeJS.Signals | null) => {
+        logger.info(`Python process exited with code '${code}', signal '${signal}'`);
         AppState.process = null;
     });
 
@@ -387,6 +403,7 @@ app.whenReady().then(async () => {
     // Ensure the child process is terminated if the application crashes
     const terminateChildProcess = () => {
         if (AppState.process) {
+            logger.error('Application exist, terminating child process');
             AppState.process.kill();
             AppState.process = null;
         }

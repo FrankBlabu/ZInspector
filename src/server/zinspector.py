@@ -1,18 +1,15 @@
-from concurrent import futures
-
-import argparse
-import grpc
-import logging
-import os
-import sys
-import trimesh
-
-import zinspector_pb2
-import zinspector_pb2_grpc
-
-from elements.object import ObjectIdDatabase
-from elements.project import Project, Mesh
 from elements.mesh import Mesh
+from elements.project import Project, Mesh
+from elements.object import ObjectIdDatabase
+import zinspector_pb2_grpc
+import zinspector_pb2
+import trimesh
+import sys
+import os
+import logging
+import grpc
+import argparse
+from concurrent import futures
 
 log = logging.getLogger(__name__)
 logging.basicConfig(level=logging.DEBUG, format='%(levelname)s: %(message)s', stream=sys.stdout)

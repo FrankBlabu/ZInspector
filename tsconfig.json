@@ -1,13 +1,23 @@
 {
     "compilerOptions": {
         "target": "ES6",
+        "allowJs": true,
         "module": "CommonJS",
         "strict": true,
         "esModuleInterop": true,
-        "outDir": "./dist/ui",
-        "sourceMap": true
+        "outDir": "./dist/app",
+        "sourceMap": true,
+        "paths": {
+            "*": [
+                "./node_modules/*"
+            ],
+            "@/*": [
+                "./src/app/*"
+            ]
+        },
+        "jsx": "react-jsx"
     },
     "include": [
-        "src/**/*.ts"
+        "src/app/**/*.ts"
     ]
 }
