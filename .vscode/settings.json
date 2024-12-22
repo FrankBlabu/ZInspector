@@ -1,11 +1,9 @@
 {
     "python.testing.unittestArgs": [
-        "-v",
-        "-s",
-        "./server",
-        "-p",
-        "test_*.py"
+        "discover"
     ],
     "python.testing.pytestEnabled": false,
-    "python.testing.unittestEnabled": true
+    "python.testing.unittestEnabled": true,
+    "python.testing.cwd": "src/server",
+    "python.testing.promptToConfigure": true
 }

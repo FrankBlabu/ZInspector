@@ -11,7 +11,7 @@
     "rebuild": "npm run clean && npm run build",
     "clean": "rm -rf dist",
     "start": "electron .",
-    "test-server": "python -m unittest discover -s server/tests"
+    "test-server": "cd src/server && python -m unittest discover"
   },
   "author": "Frank Blankenburg",
   "license": "ISC",

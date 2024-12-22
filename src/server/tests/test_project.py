@@ -5,8 +5,8 @@ import shutil
 import tempfile
 import trimesh
 
-from server.src.elements.project import Project
-from server.src.elements.mesh import Mesh
+from elements.project import Project
+from elements.mesh import Mesh
 
 
 class TestProject(unittest.TestCase):

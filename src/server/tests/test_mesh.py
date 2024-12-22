@@ -6,7 +6,7 @@ import h5py
 import trimesh
 import numpy as np
 
-from server.src.elements.mesh import Mesh
+from elements.mesh import Mesh
 
 
 class TestMesh(unittest.TestCase):
