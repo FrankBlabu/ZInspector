@@ -18,6 +18,7 @@ from elements.object import Object, ObjectIdDatabase
 log = logging.getLogger(__name__)
 logging.basicConfig(level=logging.DEBUG, format='%(levelname)s: %(message)s', stream=sys.stdout)
 
+
 class Root (Object):
     '''
     The root object of the project database
@@ -26,18 +27,19 @@ class Root (Object):
     def __init__(self):
         super().__init__('Root')
         self.projects = []
-    
+
     def get_children(self):
         return self.projects
-    
+
     def add_project(self, project):
         self.projects.append(project)
-        
+
     def __load__(self, parent: h5py.Group):
-        super ().__load__ (parent)
-        
+        super().__load__(parent)
+
     def __save__(self, parent: h5py.Group):
-        super ().__save__ (parent)
+        super().__save__(parent)
+
 
 class ZInspector(zinspector_pb2_grpc.ZInspectorServicer):
     '''
@@ -54,31 +56,31 @@ class ZInspector(zinspector_pb2_grpc.ZInspectorServicer):
         '''
 
         log.info(f'GetObjectTree: {request.id}')
-        
+
         # Local function which recursively builds the tree
         def build_tree(obj):
             objs = []
             for child in obj.get_children():
                 objs.append({
                     'id': child.get_id(),
-                    'name': child.get_name(),
-                    'type': child.__type__ (),
+                    'label': child.get_name(),
+                    'type': child.__type__(),
                     'children': build_tree(child)
                 })
-                
+
             return objs
 
         tree = {}
-        
+
         try:
             if request.id:
-                tree = build_tree (ObjectIdDatabase.get(request.id))
+                tree = build_tree(ObjectIdDatabase.get(request.id))
             else:
-                tree = build_tree (ZInspector.root)
+                tree = build_tree(ZInspector.root)
 
         except Exception as e:
             self.__handle_exception__(e, context, grpc.StatusCode.NOT_FOUND)
-            
+
         return zinspector_pb2.JSONResponse(json=json.dumps(tree))
 
     def GetObjects(self, request, context):
@@ -91,12 +93,12 @@ class ZInspector(zinspector_pb2_grpc.ZInspectorServicer):
         ids = []
 
         try:
-            
+
             if request.id:
                 parent = ObjectIdDatabase.get(request.id)
             else:
                 parent = ZInspector.root
-                
+
             ids = [child.get_id() for child in parent.get_children()]
 
         except Exception as e:

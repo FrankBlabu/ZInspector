@@ -4,7 +4,7 @@
  * This file creates the main window and sets up the application.
  */
 
-import { app, BrowserWindow, Menu, dialog } from 'electron';
+import { app, BrowserWindow, ipcMain, Menu, dialog } from 'electron';
 import logger from './logging';
 import * as path from 'path';
 import { spawn, ChildProcess } from 'child_process';
@@ -93,6 +93,10 @@ function createWindow(): void {
                 {
                     label: 'Reload',
                     role: 'reload'
+                },
+                {
+                    label: 'Trigger renderer',
+                    click: () => AppState.mainWindow!.webContents.send('app::trigger', "*** MESSAGE ***")
                 },
                 {
                     label: 'Print object tree',
@@ -373,19 +377,7 @@ app.whenReady().then(async () => {
         AppState.server = new ZInspector(`localhost:${port}`, grpc.credentials.createInsecure());
     });
 
-    createWindow()
-
-    app.on('activate', () => {
-        if (BrowserWindow.getAllWindows().length === 0) {
-            createWindow();
-        }
-    });
-
-    AppState.mainWindow!.on('closed', () => {
-        AppState.mainWindow = null;
-    });
-
-    // Ensure the child process is terminated if the application crashes
+    // Ensure the server process is terminated if the application crashes
     const terminateChildProcess = () => {
         if (AppState.process) {
             logger.error('Application exist, terminating child process');
@@ -398,6 +390,31 @@ app.whenReady().then(async () => {
     process.on('SIGINT', terminateChildProcess);
     process.on('SIGTERM', terminateChildProcess);
     process.on('uncaughtException', terminateChildProcess);
+
+    //
+    // Register renderer process event handlers
+    //
+    ipcMain.on('app::open-project', () => {
+        logger.info('Open project triggered !');
+        onNewProject();
+    });
+
+    //
+    // Create the main window and load the UI
+    //
+
+    createWindow()
+
+    app.on('activate', () => {
+        if (BrowserWindow.getAllWindows().length === 0) {
+            createWindow();
+        }
+    });
+
+    AppState.mainWindow!.on('closed', () => {
+        AppState.mainWindow = null;
+    });
+
 });
 
 /**
