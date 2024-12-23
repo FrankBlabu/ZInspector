@@ -2,8 +2,11 @@ import { useState, useEffect } from 'react';
 import reactLogo from './assets/react.svg';
 import viteLogo from '/vite.svg';
 import './App.css';
-import TreeView from 'react-treeview';
-import 'react-treeview/react-treeview.css';
+//import 'react-treeview/react-treeview.css';
+
+//import Box from '@mui/material/Box';
+import { TreeViewBaseItem } from '@mui/x-tree-view/models';
+import { RichTreeView } from '@mui/x-tree-view/RichTreeView';
 
 window.app.onTriggerRenderer((message: string) => {
   console.log(`*** Received message from main: ${message}`);
@@ -11,12 +14,15 @@ window.app.onTriggerRenderer((message: string) => {
 
 function App() {
   const [count, setCount] = useState(0);
-  const [treeData, setTreeData] = useState([
-    {
+  const [treeData, setTreeData] = useState(() => {
+    const items: TreeViewBaseItem[] = [{
+      id: '',
       label: 'Projects',
       children: []
-    },
-  ]);
+    }];
+
+    return items;
+  });
 
   useEffect(() => {
     //const { ipcRenderer } = window.require('electron');
@@ -27,7 +33,9 @@ function App() {
       console.log(`*** Received elements from main: `, parsed_elements);
       console.log('Before: ', treeData);
 
-      setTreeData([parsed_elements]);
+      const items: TreeViewBaseItem[] = parsed_elements;
+
+      setTreeData(items);
     });
 
     /*
@@ -40,17 +48,7 @@ function App() {
   return (
     <div className="app-container">
       <div className="explorer">
-        {treeData.map((node, i) => (
-          <TreeView key={i} nodeLabel={node.label} defaultCollapsed={false}>
-            {node.children && node.children.map((child, j) => (
-              <TreeView key={j} nodeLabel={child.label} defaultCollapsed={false}>
-                {child.children && child.children.map((grandchild, k) => (
-                  <TreeView key={k} nodeLabel={grandchild.label} defaultCollapsed={false} />
-                ))}
-              </TreeView>
-            ))}
-          </TreeView>
-        ))}
+        <RichTreeView items={treeData} />
       </div>
       <div className="start-page">
         <div>

@@ -212,10 +212,7 @@ async function onUpdateRenderer() {
             handleError(error);
         } else {
             let tree = JSON.parse(response.json);
-            tree = {
-                label: 'Projects',
-                children: tree
-            };
+            tree = [{ id: '', label: 'Projects', children: tree }];
 
             AppState.mainWindow!.webContents.send('app::update', JSON.stringify(tree));
         }
