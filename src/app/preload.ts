@@ -10,7 +10,8 @@ contextBridge.exposeInMainWorld('app', {
   //
   // ZInspector callback functions
   //
-  onTriggerRenderer: (callback: (message: string) => void) => ipcRenderer.on('app::trigger', (_event, message) => callback(message))
+  onTriggerRenderer: (callback: (message: string) => void) => ipcRenderer.on('app::trigger', (_event, message) => callback(message)),
+  onUpdate: (callback: (elements: string) => void) => ipcRenderer.on('app::update', (_event, elements) => callback(elements))
 
 });
 

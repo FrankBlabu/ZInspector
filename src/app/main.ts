@@ -47,8 +47,8 @@ function createWindow(): void {
     // native APIs to the renderer process.
     //
     AppState.mainWindow = new BrowserWindow({
-        width: 800,
-        height: 600,
+        width: 2048,
+        height: 1024,
         webPreferences: {
             preload: path.join(__dirname, 'preload.js')
         }
@@ -95,8 +95,8 @@ function createWindow(): void {
                     role: 'reload'
                 },
                 {
-                    label: 'Trigger renderer',
-                    click: () => AppState.mainWindow!.webContents.send('app::trigger', "*** MESSAGE ***")
+                    label: 'Update renderer',
+                    click: () => onUpdateRenderer()
                 },
                 {
                     label: 'Print object tree',
@@ -142,6 +142,8 @@ async function onNewProject() {
                 const ids = response.ids;
                 logger.info(`Project created, ids=${ids}`);
             }
+
+            onUpdateRenderer();
         });
     }
 }
@@ -178,6 +180,8 @@ async function onImportMesh() {
                     else {
                         logger.info(`Mesh created, id=${ids}`);
                     }
+
+                    onUpdateRenderer();
                 });
             }
         });
@@ -194,6 +198,27 @@ async function onAbout(): Promise<void> {
         title: 'About',
         message: `This is a simple Electron app to display 3D models in STL format.`,
         buttons: ['OK']
+    });
+}
+
+/**
+ * Update renderer element view
+ */
+async function onUpdateRenderer() {
+
+
+    AppState.server.GetObjectTree({ id: '' }, (error: any, response: any) => {
+        if (error) {
+            handleError(error);
+        } else {
+            let tree = JSON.parse(response.json);
+            tree = {
+                label: 'Projects',
+                children: tree
+            };
+
+            AppState.mainWindow!.webContents.send('app::update', JSON.stringify(tree));
+        }
     });
 }
 

@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import reactLogo from './assets/react.svg';
 import viteLogo from '/vite.svg';
 import './App.css';
@@ -11,23 +11,31 @@ window.app.onTriggerRenderer((message: string) => {
 
 function App() {
   const [count, setCount] = useState(0);
-
-  const treeData = [
+  const [treeData, setTreeData] = useState([
     {
-      label: 'Root',
-      children: [
-        { label: 'Child 1' },
-        { label: 'Child 2' },
-        {
-          label: 'Child 3',
-          children: [
-            { label: 'Grandchild 1' },
-            { label: 'Grandchild 2' },
-          ],
-        },
-      ],
+      label: 'Projects',
+      children: []
     },
-  ];
+  ]);
+
+  useEffect(() => {
+    //const { ipcRenderer } = window.require('electron');
+
+    window.app.onUpdate((elements: string) => {
+      const parsed_elements = JSON.parse(elements);
+
+      console.log(`*** Received elements from main: `, parsed_elements);
+      console.log('Before: ', treeData);
+
+      setTreeData([parsed_elements]);
+    });
+
+    /*
+    return () => {
+      ipcRenderer.removeAllListeners('app::update');
+    }
+      */
+  }, [treeData]);
 
   return (
     <div className="app-container">
