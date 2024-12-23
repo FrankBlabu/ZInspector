@@ -32,7 +32,6 @@
   "dependencies": {
     "@grpc/grpc-js": "^1.12.5",
     "@grpc/proto-loader": "^0.7.13",
-    "create-react-app": "^5.0.1",
     "pino": "^9.5.0",
     "pino-pretty": "^13.0.0",
     "react-router-dom": "^7.1.0"
