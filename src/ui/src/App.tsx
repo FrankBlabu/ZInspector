@@ -1,19 +1,17 @@
 import { useState, useEffect } from 'react';
 import reactLogo from './assets/react.svg';
 import viteLogo from '/vite.svg';
-import './App.css';
-//import 'react-treeview/react-treeview.css';
-
-//import Box from '@mui/material/Box';
-import { TreeViewBaseItem } from '@mui/x-tree-view/models';
+import { TreeViewBaseItem, TreeViewItemId } from '@mui/x-tree-view/models';
 import { RichTreeView } from '@mui/x-tree-view/RichTreeView';
 
-window.app.onTriggerRenderer((message: string) => {
-  console.log(`*** Received message from main: ${message}`);
-});
+import './App.css';
 
 function App() {
+
   const [count, setCount] = useState(0);
+  const [callbackRegistered, setCallbackRegistered] = useState(false);
+  const [expandedItems, setExpandedItems] = useState<string[]>([]);
+  const [selectedItems, setSelectedItems] = useState<string[]>([]);
   const [treeData, setTreeData] = useState(() => {
     const items: TreeViewBaseItem[] = [{
       id: '',
@@ -25,25 +23,37 @@ function App() {
   });
 
   useEffect(() => {
-    //const { ipcRenderer } = window.require('electron');
 
-    window.app.onUpdate((elements: string) => {
+    const onUpdateFunc = (elements: string) => {
       const parsed_elements = JSON.parse(elements);
+      console.log('Update: ', parsed_elements);
+      setTreeData(parsed_elements);
+    };
 
-      console.log(`*** Received elements from main: `, parsed_elements);
-      console.log('Before: ', treeData);
-
-      const items: TreeViewBaseItem[] = parsed_elements;
-
-      setTreeData(items);
-    });
-
-    /*
-    return () => {
-      ipcRenderer.removeAllListeners('app::update');
+    const onExpandFunc = (ids: string[]) => {
+      console.log('Expand: ', ids);
+      setExpandedItems(ids);
     }
-      */
-  }, [treeData]);
+
+    const onSelectFunc = (ids: string[]) => {
+      console.log('Select: ', ids);
+      setSelectedItems(ids);
+    }
+
+    if (!callbackRegistered) {
+      window.explorer.onUpdate(onUpdateFunc);
+      window.explorer.onExpandItems(onExpandFunc);
+      window.explorer.onSelectItems(onSelectFunc);
+      setCallbackRegistered(true);
+    }
+
+    return () => {
+      window.explorer.offUpdate(onUpdateFunc);
+      window.explorer.offExpandItems(onExpandFunc);
+      window.explorer.offSelectItems(onSelectFunc);
+    };
+
+  }, [callbackRegistered]);
 
   return (
     <div className="app-container">

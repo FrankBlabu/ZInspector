@@ -95,8 +95,8 @@ function createWindow(): void {
                     role: 'reload'
                 },
                 {
-                    label: 'Update renderer',
-                    click: () => onUpdateRenderer()
+                    label: 'Update explorer',
+                    click: () => onUpdateExplorer([])
                 },
                 {
                     label: 'Print object tree',
@@ -135,15 +135,15 @@ async function onNewProject() {
 
         logger.info(`Creating new project: ${name}`);
 
-        AppState.server.CreateProject({ name: name }, (error: any, response: any) => {
+        AppState.server.CreateProject({ name: name }, async (error: any, response: any) => {
             if (error)
                 handleError(error);
             else {
-                const ids = response.ids;
-                logger.info(`Project created, ids=${ids}`);
-            }
+                const ids: string[] = response.ids;
+                logger.info('Project created, ids=', ids);
 
-            onUpdateRenderer();
+                onUpdateExplorer(ids);
+            }
         });
     }
 }
@@ -181,7 +181,7 @@ async function onImportMesh() {
                         logger.info(`Mesh created, id=${ids}`);
                     }
 
-                    onUpdateRenderer();
+                    onUpdateExplorer(ids);
                 });
             }
         });
@@ -204,17 +204,17 @@ async function onAbout(): Promise<void> {
 /**
  * Update renderer element view
  */
-async function onUpdateRenderer() {
-
-
+function onUpdateExplorer(selected: string[]) {
     AppState.server.GetObjectTree({ id: '' }, (error: any, response: any) => {
         if (error) {
             handleError(error);
         } else {
             let tree = JSON.parse(response.json);
-            tree = [{ id: '', label: 'Projects', children: tree }];
+            tree = [{ id: '#root', label: 'Projects', children: tree }];
 
-            AppState.mainWindow!.webContents.send('app::update', JSON.stringify(tree));
+            AppState.mainWindow!.webContents.send('explorer::update', JSON.stringify(tree));
+            AppState.mainWindow!.webContents.send('explorer::expand', selected);
+            AppState.mainWindow!.webContents.send('explorer::select', selected);
         }
     });
 }
