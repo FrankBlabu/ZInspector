@@ -1,17 +1,18 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, SyntheticEvent } from 'react';
 import reactLogo from './assets/react.svg';
 import viteLogo from '/vite.svg';
-import { TreeViewBaseItem, TreeViewItemId } from '@mui/x-tree-view/models';
+import { TreeViewBaseItem } from '@mui/x-tree-view/models';
+import { useTreeViewApiRef } from '@mui/x-tree-view/hooks';
 import { RichTreeView } from '@mui/x-tree-view/RichTreeView';
 
 import './App.css';
 
 function App() {
 
+  const apiRef = useTreeViewApiRef();
+
   const [count, setCount] = useState(0);
   const [callbackRegistered, setCallbackRegistered] = useState(false);
-  const [expandedItems, setExpandedItems] = useState<string[]>([]);
-  const [selectedItems, setSelectedItems] = useState<string[]>([]);
   const [treeData, setTreeData] = useState(() => {
     const items: TreeViewBaseItem[] = [{
       id: '',
@@ -28,16 +29,26 @@ function App() {
       const parsed_elements = JSON.parse(elements);
       console.log('Update: ', parsed_elements);
       setTreeData(parsed_elements);
+
     };
 
     const onExpandFunc = (ids: string[]) => {
       console.log('Expand: ', ids);
-      setExpandedItems(ids);
+
+      const event = { type: 'custom' } as React.SyntheticEvent;
+      for (const id of ids) {
+        apiRef.current!.setItemExpansion(event, id, true);
+      }
     }
 
     const onSelectFunc = (ids: string[]) => {
       console.log('Select: ', ids);
-      setSelectedItems(ids);
+
+      const event = { type: 'custom' } as React.SyntheticEvent;
+
+      for (const id of ids) {
+        apiRef.current?.selectItem({ event, itemId: id, keepExistingSelection: ids.indexOf(id) !== 0 });
+      }
     }
 
     if (!callbackRegistered) {
@@ -58,7 +69,7 @@ function App() {
   return (
     <div className="app-container">
       <div className="explorer">
-        <RichTreeView items={treeData} />
+        <RichTreeView items={treeData} apiRef={apiRef} />
       </div>
       <div className="start-page">
         <div>
@@ -86,6 +97,9 @@ function App() {
           Node.js version: {window.versions.node()}
           <br />
           Chrome version: {window.versions.chrome()}
+        </p>
+        <p>
+          TreeData: {JSON.stringify(treeData)}
         </p>
       </div>
     </div>

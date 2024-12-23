@@ -27,6 +27,14 @@ namespace AppState {
     export let server: any = null;
 };
 
+/*
+ * Constants
+ */
+namespace Constants {
+    export const UI_PORT = 51000;
+    export const EXPLORER_ROOT_ID = '#root';
+};
+
 /**********************************************************************
  * Main window creation
  */
@@ -55,7 +63,7 @@ function createWindow(): void {
     });
 
     if (true) {
-        const uiPort = process.env.UI_PORT || 51000;
+        const uiPort = process.env.UI_PORT || Constants.UI_PORT;
         logger.info(`Loading UI from http://localhost:${uiPort}`);
         AppState.mainWindow!.loadURL(`http://localhost:${uiPort}`);
     }
@@ -96,7 +104,7 @@ function createWindow(): void {
                 },
                 {
                     label: 'Update explorer',
-                    click: () => onUpdateExplorer([])
+                    click: () => onUpdateExplorer([], [])
                 },
                 {
                     label: 'Print object tree',
@@ -142,7 +150,7 @@ async function onNewProject() {
                 const ids: string[] = response.ids;
                 logger.info('Project created, ids=', ids);
 
-                onUpdateExplorer(ids);
+                onUpdateExplorer([Constants.EXPLORER_ROOT_ID], ids);
             }
         });
     }
@@ -170,9 +178,10 @@ async function onImportMesh() {
             else if (ids.length === 0)
                 handleError('No projects found');
             else {
-                logger.debug(`Projects: ${ids}, path: ${path}`);
+                const parent_ids = ids;
+                logger.debug(`Projects: ${parent_ids}, path: ${path}`);
 
-                AppState.server.ImportMesh({ project: ids[0], path: path }, (error: any, response: any) => {
+                AppState.server.ImportMesh({ project: parent_ids[0], path: path }, (error: any, response: any) => {
                     const { ids } = response;
 
                     if (error)
@@ -181,7 +190,7 @@ async function onImportMesh() {
                         logger.info(`Mesh created, id=${ids}`);
                     }
 
-                    onUpdateExplorer(ids);
+                    onUpdateExplorer(parent_ids, ids);
                 });
             }
         });
@@ -204,16 +213,16 @@ async function onAbout(): Promise<void> {
 /**
  * Update renderer element view
  */
-function onUpdateExplorer(selected: string[]) {
+function onUpdateExplorer(expanded: string[], selected: string[]) {
     AppState.server.GetObjectTree({ id: '' }, (error: any, response: any) => {
         if (error) {
             handleError(error);
         } else {
             let tree = JSON.parse(response.json);
-            tree = [{ id: '#root', label: 'Projects', children: tree }];
+            tree = [{ id: Constants.EXPLORER_ROOT_ID, label: 'Projects', children: tree }];
 
             AppState.mainWindow!.webContents.send('explorer::update', JSON.stringify(tree));
-            AppState.mainWindow!.webContents.send('explorer::expand', selected);
+            AppState.mainWindow!.webContents.send('explorer::expand', expanded);
             AppState.mainWindow!.webContents.send('explorer::select', selected);
         }
     });
