@@ -219,7 +219,7 @@ function onUpdateExplorer(expanded: string[], selected: string[]) {
             handleError(error);
         } else {
             let tree = JSON.parse(response.json);
-            tree = [{ id: Constants.EXPLORER_ROOT_ID, label: 'Projects', children: tree }];
+            tree = [{ id: Constants.EXPLORER_ROOT_ID, label: 'Projects', children: tree, type: 'Root' }];
 
             AppState.mainWindow!.webContents.send('explorer::update', JSON.stringify(tree));
             AppState.mainWindow!.webContents.send('explorer::expand', expanded);

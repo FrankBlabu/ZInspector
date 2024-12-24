@@ -34,6 +34,18 @@
   /* Ensure it takes the full height of the container */
 }
 
+.workbench {
+  display: flex;
+  flex-direction: column;
+  flex-grow: 1;
+  justify-content: center;
+  align-items: center;
+  padding: 20px;
+  overflow-y: auto;
+  height: 100vh;
+  /* Ensure it takes the full height of the container */
+}
+
 .button {
   background-color: #008cba;
   border: none;
