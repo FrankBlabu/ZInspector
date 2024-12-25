@@ -191,6 +191,15 @@ async function onImportMesh() {
                     }
 
                     onUpdateExplorer(parent_ids, ids);
+
+                    AppState.server.GetMeshData({ id: response.ids[0] }, (error: any, response: any) => {
+
+                        if (error)
+                            handleError(error);
+                        else {
+                            logger.info(`Mesh data: ${response.mesh}`);
+                        }
+                    });
                 });
             }
         });
