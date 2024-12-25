@@ -4,7 +4,7 @@ import viteLogo from '/vite.svg';
 
 import './App.css';
 
-function StartPage() {
+function Dashboard() {
 
   const [count, setCount] = useState(0);
 
@@ -40,4 +40,4 @@ function StartPage() {
   );
 }
 
-export default StartPage;
+export default Dashboard;

@@ -3,6 +3,7 @@ import Tabs from '@mui/material/Tabs';
 import Tab from '@mui/material/Tab';
 import Box from '@mui/material/Box';
 
+import Dashboard from './Dashboard';
 
 import './App.css';
 
@@ -36,7 +37,7 @@ function a11yProps(index: number) {
   };
 }
 
-export default function Workbench() {
+function Workbench() {
   const [value, setValue] = React.useState(0);
 
   const handleChange = (_event: React.SyntheticEvent, newValue: number) => {
@@ -45,24 +46,22 @@ export default function Workbench() {
 
   return (
     <div className="workbench">
-      <Box sx={{ width: '100%' }}>
+      <Box sx={{ width: '100%', height: '100%' }}>
         <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
           <Tabs value={value} onChange={handleChange} aria-label="basic tabs example">
-            <Tab label="Item One" {...a11yProps(0)} />
-            <Tab label="Item Two" {...a11yProps(1)} />
-            <Tab label="Item Three" {...a11yProps(2)} />
+            <Tab label="Dashboard" {...a11yProps(0)} />
+            <Tab label="Inspection" {...a11yProps(1)} />
           </Tabs>
         </Box>
         <CustomTabPanel value={value} index={0}>
-          Item One
+          <Dashboard />
         </CustomTabPanel>
         <CustomTabPanel value={value} index={1}>
-          Item Two
-        </CustomTabPanel>
-        <CustomTabPanel value={value} index={2}>
-          Item Three
+          Inspection
         </CustomTabPanel>
       </Box>
     </div>
   );
 }
+
+export default Workbench;
