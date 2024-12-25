@@ -22,7 +22,7 @@ function App() {
         <div className="explorer">
           <Explorer />
         </div>
-        <div className="start-page">
+        <div className="workbench">
           <Workbench />
         </div>
       </div>

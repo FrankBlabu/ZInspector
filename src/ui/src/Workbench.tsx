@@ -4,6 +4,7 @@ import Tab from '@mui/material/Tab';
 import Box from '@mui/material/Box';
 
 import Dashboard from './Dashboard';
+import Inspection from './Inspection';
 
 import './App.css';
 
@@ -23,9 +24,10 @@ function CustomTabPanel(props: TabPanelProps) {
       hidden={value !== index}
       id={`simple-tabpanel-${index}`}
       aria-labelledby={`simple-tab-${index}`}
+      style={{ width: '100%', height: '100%' }}
       {...other}
     >
-      {value === index && <Box sx={{ p: 3 }}>{children}</Box>}
+      {value === index && <Box sx={{ p: 2 }}>{children}</Box>}
     </div>
   );
 }
@@ -34,6 +36,7 @@ function a11yProps(index: number) {
   return {
     id: `simple-tab-${index}`,
     'aria-controls': `simple-tabpanel-${index}`,
+    'height': '100%'
   };
 }
 
@@ -45,7 +48,7 @@ function Workbench() {
   };
 
   return (
-    <div className="workbench">
+    <div className="workbench-tabs">
       <Box sx={{ width: '100%', height: '100%' }}>
         <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
           <Tabs value={value} onChange={handleChange} aria-label="basic tabs example">
@@ -57,7 +60,7 @@ function Workbench() {
           <Dashboard />
         </CustomTabPanel>
         <CustomTabPanel value={value} index={1}>
-          Inspection
+          <Inspection />
         </CustomTabPanel>
       </Box>
     </div>
