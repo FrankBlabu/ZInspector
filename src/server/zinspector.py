@@ -168,19 +168,18 @@ class ZInspector(zinspector_pb2_grpc.ZInspectorServicer):
 
         log.info(f'Get mesh data: {request.id}')
 
-        data = {}
+        data = bytes()
 
         try:
-            data = ObjectIdDatabase.get(request.id).data
+            data = ObjectIdDatabase.get(request.id).data.export(file_type='stl')
 
-            vertices = [zinspector_pb2.Vertex(x=v[0], y=v[1], z=v[2]) for v in data.vertices]
-            faces = [zinspector_pb2.Face(indices=f) for f in data.faces]
-            mesh = zinspector_pb2.Mesh(vertices=vertices, faces=faces)
+            chunk_size = 1024 * 1024
+            
+            for i in range(0, len(data), chunk_size):
+                yield zinspector_pb2.MeshChunk(data=data[i:i + chunk_size])
 
         except Exception as e:
             self.__handle_exception__(e, context, grpc.StatusCode.NOT_FOUND)
-
-        return zinspector_pb2.MeshResponse(mesh=mesh)
 
     def __handle_exception__(self, e, context, status=grpc.StatusCode.UNKNOWN):
         log.error(f'{e}')

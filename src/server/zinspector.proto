@@ -28,25 +28,7 @@ service ZInspector {
 
     // Import mesh into a project
     rpc ImportMesh (ImportMeshRequest) returns (IdResponse);    
-    rpc GetMeshData (IdRequest) returns (MeshResponse);
-}
-
-/***************************************************************************
- * Data structures
- */
-message Vertex {
-    float x = 1;
-    float y = 2;
-    float z = 3;
-}
-
-message Face {
-    repeated int32 indices = 1;
-}
-
-message Mesh {
-    repeated Vertex vertices = 1;
-    repeated Face faces = 2;
+    rpc GetMeshData (IdRequest) returns (stream MeshChunk);
 }
 
 /***************************************************************************
@@ -96,8 +78,8 @@ message JSONResponse {
 /*
  * Response of GetMeshData
  */
-message MeshResponse {
-    Mesh mesh = 1;
+message MeshChunk {
+    bytes data = 1;
 }
 
 message EmptyResponse {}

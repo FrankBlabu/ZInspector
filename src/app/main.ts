@@ -190,13 +190,21 @@ async function onImportMesh() {
 
                     onUpdateExplorer(parent_ids, ids);
 
-                    AppState.server.GetMeshData({ id: response.ids[0] }, (error: any, response: any) => {
+                    const call = AppState.server.GetMeshData({ id: response.ids[0] });
 
-                        if (error)
-                            handleError(error);
-                        else {
-                            logger.info(`Mesh data: ${response.mesh}`);
-                        }
+                    let data: Uint8Array[] = [];
+
+                    call.on('data', (response: any) => {
+                        logger.info(`Mesh data: ${response.data.length} bytes`);
+                        data.push(response.data);
+                    });
+
+                    call.on('end', () => {
+                        logger.info('Mesh data stream ended');
+                    });
+
+                    call.on('error', (error: any) => {
+                        handleError(error);
                     });
                 });
             }
