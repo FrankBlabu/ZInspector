@@ -55,8 +55,6 @@ function createWindow(): void {
     // native APIs to the renderer process.
     //
     AppState.mainWindow = new BrowserWindow({
-        width: 2048,
-        height: 1024,
         webPreferences: {
             preload: path.join(__dirname, 'preload.js')
         }

@@ -19,12 +19,8 @@ function App() {
     <ThemeProvider theme={theme}>
       <CssBaseline />
       <div className="app-container">
-        <div className="explorer">
-          <Explorer />
-        </div>
-        <div className="workbench">
-          <Workbench />
-        </div>
+        <Explorer />
+        <Workbench />
       </div>
     </ThemeProvider>
   );

@@ -71,7 +71,9 @@ function Explorer() {
   }, [callbackRegistered, apiRef]);
 
   return (
-    <RichTreeView items={treeData} apiRef={apiRef} />
+    <div className="explorer">
+      <RichTreeView items={treeData} apiRef={apiRef} />
+    </div>
   );
 }
 

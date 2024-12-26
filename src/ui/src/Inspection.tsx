@@ -8,7 +8,7 @@ import './App.css';
 function Inspection() {
     return (
         <div className="inspection">
-            <Canvas style={{ width: "100%", height: "100%" }}>
+            <Canvas>
                 <OrbitControls />
                 <ambientLight intensity={0.5} />
                 <directionalLight position={[5, 5, 5]} />
