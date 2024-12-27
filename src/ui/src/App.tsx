@@ -45,7 +45,7 @@ const theme = createTheme({
   },
 });
 
-function DemoPageContent({ pathname }: { pathname: string }) {
+function AppPageContent({ pathname }: { pathname: string }) {
 
   console.log('pathname:', pathname);
 
@@ -99,7 +99,7 @@ function MainLayout(props: DemoProps) {
       window={demoWindow}
     >
       <DashboardLayout>
-        <DemoPageContent pathname={router.pathname} />
+        <AppPageContent pathname={router.pathname} />
       </DashboardLayout>
     </AppProvider>
   );
