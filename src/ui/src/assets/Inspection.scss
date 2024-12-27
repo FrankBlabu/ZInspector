@@ -4,9 +4,21 @@
 
 @use './common' as *;
 
-.canvas-container {
-    flex-grow: 1;
+.inspection {
     display: flex;
+    flex-direction: row;
+    width: 100%;
+    height: auto;
+}
+
+.explorer-container {
+    width: 20%;
+}
+
+.canvas-container {
+    width: 80%;
+    display: flex;
+    flex-grow: 1;
 }
 
 canvas {
