@@ -10,7 +10,7 @@ import { TreeViewBaseItem } from '@mui/x-tree-view/models';
 import { useTreeViewApiRef } from '@mui/x-tree-view/hooks';
 import { RichTreeView } from '@mui/x-tree-view/RichTreeView';
 
-import './App.css';
+import './App.scss';
 
 function Explorer() {
 
