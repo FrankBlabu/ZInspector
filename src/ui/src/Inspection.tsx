@@ -10,8 +10,7 @@ import Explorer from './Explorer';
 
 import './assets/Inspection.scss';
 
-
-function Inspection() {
+function MeshRenderer () {
 
     const [callbackRegistered, setCallbackRegistered] = useState(false);
     const { scene } = useThree();
@@ -49,7 +48,10 @@ function Inspection() {
 
     }, [callbackRegistered]);
 
+    return null;
+}
 
+function Inspection() {
 
     return (
         <Container style={{ display: 'flex', height: '100vh' }}>
@@ -61,11 +63,8 @@ function Inspection() {
                     <OrbitControls />
                     <ambientLight intensity={0.5} />
                     <directionalLight position={[5, 5, 5]} />
-                    {/*                     <mesh>
-                        <boxGeometry args={[1, 1, 1]} />
-                        <meshStandardMaterial color="orange" />
-                    </mesh>
- */}                </Canvas>
+                    <MeshRenderer />
+                </Canvas>
             </Box>
         </Container>
     );
