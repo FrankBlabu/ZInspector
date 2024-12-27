@@ -19,6 +19,14 @@ log = logging.getLogger(__name__)
 logging.basicConfig(level=logging.DEBUG, format='%(levelname)s: %(message)s', stream=sys.stdout)
 
 
+class Configuration:
+    '''
+    Constants user for configuration
+    '''
+    MESH_DATA_CHUNK_SIZE = 1024 * 1024 * 2  # Default limit for grpc is 4MB
+    MESH_ENCODING = 'glb'
+
+
 class Root (Object):
     '''
     The root object of the project database
@@ -171,12 +179,12 @@ class ZInspector(zinspector_pb2_grpc.ZInspectorServicer):
         data = bytes()
 
         try:
-            data = ObjectIdDatabase.get(request.id).data.export(file_type='stl')
+            data = ObjectIdDatabase.get(request.id).data.export(file_type=Configuration.MESH_ENCODING)
 
-            chunk_size = 1024 * 1024
-            
-            for i in range(0, len(data), chunk_size):
-                yield zinspector_pb2.MeshChunk(data=data[i:i + chunk_size])
+            for step, i in enumerate (range(0, len(data), Configuration.MESH_DATA_CHUNK_SIZE)):
+                yield zinspector_pb2.MeshChunk(format=Configuration.MESH_ENCODING,
+                                               index=step,
+                                               data=data[i:i + Configuration.MESH_DATA_CHUNK_SIZE])
 
         except Exception as e:
             self.__handle_exception__(e, context, grpc.StatusCode.NOT_FOUND)

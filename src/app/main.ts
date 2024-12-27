@@ -186,26 +186,31 @@ async function onImportMesh() {
                         handleError(error);
                     else {
                         logger.info(`Mesh created, id=${ids}`);
+
+                        onUpdateExplorer(parent_ids, ids);
+
+                        //
+                        // Fetch mesh data via streaming. This is necessary because the chunk size in gRPC
+                        // is limited to 4MB. For large meshes, we need to stream the data in chunks.
+                        //
+                        const call = AppState.server.GetMeshData({ id: response.ids[0] });
+
+                        let buffer: Buffer = Buffer.alloc(0);
+
+                        call.on('data', (response: any) => {
+                            logger.info(`Received mesh data: #${response.index} ${response.data.length} bytes in ${response.format} format`);
+                            buffer = Buffer.concat([buffer, response.data]);
+                        });
+
+                        call.on('end', () => {
+                            logger.info('Mesh data stream ended, received ' + buffer.length + ' bytes');
+                            AppState.mainWindow!.webContents.send('renderer::mesh-changed', buffer);
+                        });
+
+                        call.on('error', (error: any) => {
+                            handleError(error);
+                        });
                     }
-
-                    onUpdateExplorer(parent_ids, ids);
-
-                    const call = AppState.server.GetMeshData({ id: response.ids[0] });
-
-                    let data: Uint8Array[] = [];
-
-                    call.on('data', (response: any) => {
-                        logger.info(`Mesh data: ${response.data.length} bytes`);
-                        data.push(response.data);
-                    });
-
-                    call.on('end', () => {
-                        logger.info('Mesh data stream ended');
-                    });
-
-                    call.on('error', (error: any) => {
-                        handleError(error);
-                    });
                 });
             }
         });

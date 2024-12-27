@@ -1,8 +1,9 @@
 import { contextBridge, ipcRenderer } from 'electron';
 
-const updateCallbacks = new Map<(tree: string) => void, (event: Electron.IpcRendererEvent, tree: string) => void>();
-const expandCallbacks = new Map<(ids: string[]) => void, (event: Electron.IpcRendererEvent, ids: string[]) => void>();
-const selectCallbacks = new Map<(ids: string[]) => void, (event: Electron.IpcRendererEvent, ids: string[]) => void>();
+const explorerUpdateCallbacks = new Map<(tree: string) => void, (event: Electron.IpcRendererEvent, tree: string) => void>();
+const explorerExpandCallbacks = new Map<(ids: string[]) => void, (event: Electron.IpcRendererEvent, ids: string[]) => void>();
+const explorerSelectCallbacks = new Map<(ids: string[]) => void, (event: Electron.IpcRendererEvent, ids: string[]) => void>();
+const meshChangedCallbacks = new Map<(mesh: Buffer) => void, (event: Electron.IpcRendererEvent, mesh: Buffer) => void>();
 
 //
 // 'app': Global application API (e.g. open/close project)
@@ -24,20 +25,20 @@ contextBridge.exposeInMainWorld('explorer', {
   onUpdate: (callback: (tree: string) => void) => {
 
     // Check if the callback is already registered
-    if (updateCallbacks.has(callback)) {
+    if (explorerUpdateCallbacks.has(callback)) {
       console.warn('Callback already registered');
     }
 
     const wrappedCallback = (_event: Electron.IpcRendererEvent, tree: string) => callback(tree);
-    updateCallbacks.set(callback, wrappedCallback);
+    explorerUpdateCallbacks.set(callback, wrappedCallback);
     ipcRenderer.on('explorer::update', wrappedCallback);
   },
 
   offUpdate: (callback: (tree: string) => void) => {
-    const wrappedCallback = updateCallbacks.get(callback);
+    const wrappedCallback = explorerUpdateCallbacks.get(callback);
     if (wrappedCallback) {
       ipcRenderer.off('explorer::update', wrappedCallback);
-      updateCallbacks.delete(callback);
+      explorerUpdateCallbacks.delete(callback);
     }
   },
 
@@ -47,20 +48,20 @@ contextBridge.exposeInMainWorld('explorer', {
   onExpandItems: (callback: (ids: string[]) => void) => {
 
     // Check if the callback is already registered
-    if (expandCallbacks.has(callback)) {
+    if (explorerExpandCallbacks.has(callback)) {
       console.warn('Callback already registered');
     }
 
     const wrappedCallback = (_event: Electron.IpcRendererEvent, ids: string[]) => callback(ids);
-    expandCallbacks.set(callback, wrappedCallback);
+    explorerExpandCallbacks.set(callback, wrappedCallback);
     ipcRenderer.on('explorer::expand', wrappedCallback);
   },
 
   offExpandItems: (callback: (ids: string[]) => void) => {
-    const wrappedCallback = expandCallbacks.get(callback);
+    const wrappedCallback = explorerExpandCallbacks.get(callback);
     if (wrappedCallback) {
       ipcRenderer.off('explorer::expand', wrappedCallback);
-      expandCallbacks.delete(callback);
+      explorerExpandCallbacks.delete(callback);
     }
   },
 
@@ -70,19 +71,47 @@ contextBridge.exposeInMainWorld('explorer', {
   onSelectItems: (callback: (ids: string[]) => void) => {
 
     // Check if the callback is already registered
-    if (selectCallbacks.has(callback)) {
+    if (explorerSelectCallbacks.has(callback)) {
       console.warn('Callback already registered');
     }
 
     const wrappedCallback = (_event: Electron.IpcRendererEvent, ids: string[]) => callback(ids);
-    selectCallbacks.set(callback, wrappedCallback);
+    explorerSelectCallbacks.set(callback, wrappedCallback);
     ipcRenderer.on('explorer::select', wrappedCallback);
   },
   offSelectItems: (callback: (ids: string[]) => void) => {
-    const wrappedCallback = selectCallbacks.get(callback);
+    const wrappedCallback = explorerSelectCallbacks.get(callback);
     if (wrappedCallback) {
       ipcRenderer.off('explorer::select', wrappedCallback);
-      selectCallbacks.delete(callback);
+      explorerSelectCallbacks.delete(callback);
+    }
+  },
+});
+
+//
+// 'renderer': Everything related to the renderer
+//
+contextBridge.exposeInMainWorld('renderer', {
+
+  //
+  // 'onMeshChanged': Register callback to be called when the mesh is changed
+  //
+  onMeshChanged: (callback: (mesh: Buffer) => void) => {
+    // Check if the callback is already registered
+    if (meshChangedCallbacks.has(callback)) {
+      console.warn('Callback already registered');
+    }
+
+    const wrappedCallback = (_event: Electron.IpcRendererEvent, mesh: Buffer) => callback(mesh);
+    meshChangedCallbacks.set(callback, wrappedCallback);
+    ipcRenderer.on('renderer::mesh-changed', (_event: Electron.IpcRendererEvent, mesh: Buffer) => callback(mesh));
+  },
+
+  offMeshChanged: (callback: (mesh: Buffer) => void) => {
+    const wrappedCallback = meshChangedCallbacks.get(callback);
+    if (wrappedCallback) {
+      ipcRenderer.off('renderer::mesh-changed', wrappedCallback);
+      meshChangedCallbacks.delete(callback);
     }
   },
 });

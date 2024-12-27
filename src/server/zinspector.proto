@@ -79,7 +79,9 @@ message JSONResponse {
  * Response of GetMeshData
  */
 message MeshChunk {
-    bytes data = 1;
+    string format = 1;
+    int32 index = 2;
+    bytes data = 3;
 }
 
 message EmptyResponse {}
