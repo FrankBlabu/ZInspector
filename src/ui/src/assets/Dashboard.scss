@@ -5,15 +5,6 @@
 @use './common' as *;
 
 
-.dashboard {
-  display: flex;
-  flex-direction: column;
-  flex-grow: 1;
-  justify-content: center;
-  align-items: center;
-  padding: 5px;
-}
-
 .dashboard.logo {
   height: 6em;
   padding: 1.5em;

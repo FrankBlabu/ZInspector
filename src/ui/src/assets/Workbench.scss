@@ -3,28 +3,3 @@
 //
 
 @use './common' as *;
-
-
-.workbench {
-  display: flex;
-  justify-content: center;
-  align-items: stretch;
-  flex-grow: 1;
-  padding: 5px;
-}
-
-.workbench>* {
-  display: flex;
-  flex-direction: column;
-  align-items: stretch;
-  flex-grow: 1;
-  background-color: yellow;
-}
-
-div[role="tabpanel"] {
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: stretch;
-  background-color: black;
-}

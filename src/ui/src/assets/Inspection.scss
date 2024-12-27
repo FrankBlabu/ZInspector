@@ -4,8 +4,12 @@
 
 @use './common' as *;
 
+.canvas-container {
+    flex-grow: 1;
+    display: flex;
+}
 
-.inspection {
-  display: flex;
-  align-items: stretch;
+canvas {
+    width: 100%;
+    height: 100%;
 }

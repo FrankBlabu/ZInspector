@@ -1,13 +1,15 @@
 //import React from "react";
 import { Canvas } from "@react-three/fiber";
 import { OrbitControls } from "@react-three/drei";
+import Box from '@mui/material/Box';
+
 
 import './assets/Inspection.scss';
 
 
 function Inspection() {
     return (
-        <div className="inspection">
+        <Box className="canvas-container">
             <Canvas>
                 <OrbitControls />
                 <ambientLight intensity={0.5} />
@@ -17,7 +19,7 @@ function Inspection() {
                     <meshStandardMaterial color="orange" />
                 </mesh>
             </Canvas>
-        </div>
+        </Box>
     );
 };
 

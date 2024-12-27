@@ -24,10 +24,10 @@ function CustomTabPanel(props: TabPanelProps) {
       hidden={value !== index}
       id={`simple-tabpanel-${index}`}
       aria-labelledby={`simple-tab-${index}`}
-      style={{ width: '100%', height: '100%' }}
+      style={{ width: '100%', height: '100%', display: value === index ? 'flex' : 'none', flexDirection: 'row', alignItems: 'stretch', justifyContent: 'stretch' }}
       {...other}
     >
-      {value === index && <Box sx={{ p: 2 }}>{children}</Box>}
+      {children}
     </div>
   );
 }
@@ -48,21 +48,19 @@ function Workbench() {
   };
 
   return (
-    <div className="workbench-tabs">
-      <Box sx={{ width: '100%', height: '100%' }}>
-        <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
-          <Tabs value={value} onChange={handleChange} aria-label="basic tabs example">
-            <Tab label="Dashboard" {...a11yProps(0)} />
-            <Tab label="Inspection" {...a11yProps(1)} />
-          </Tabs>
-        </Box>
-        <CustomTabPanel value={value} index={0}>
-          <Dashboard />
-        </CustomTabPanel>
-        <CustomTabPanel value={value} index={1}>
-          <Inspection />
-        </CustomTabPanel>
+    <div className="workbench">
+      <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
+        <Tabs value={value} onChange={handleChange} aria-label="basic tabs example">
+          <Tab label="Dashboard" {...a11yProps(0)} />
+          <Tab label="Inspection" {...a11yProps(1)} />
+        </Tabs>
       </Box>
+      <CustomTabPanel value={value} index={0}>
+        <Dashboard />
+      </CustomTabPanel>
+      <CustomTabPanel value={value} index={1}>
+        <Inspection />
+      </CustomTabPanel>
     </div>
   );
 }

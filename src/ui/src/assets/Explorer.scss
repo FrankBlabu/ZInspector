@@ -3,16 +3,3 @@
 //
 
 @use './common' as *;
-
-.explorer {
-  min-width: 200px;
-  max-width: 30%;
-  border-right: 1px solid #ccc;
-  padding: 5px;
-  display: flex;
-  align-items: stretch;
-}
-
-.explorer>* {
-  flex-grow: 1;
-}
