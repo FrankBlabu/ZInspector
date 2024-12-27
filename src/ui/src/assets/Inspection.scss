@@ -1,0 +1,11 @@
+//
+// Inspection.scss - Styles for the 'Inspection' component
+//
+
+@use './common' as *;
+
+
+.inspection {
+  display: flex;
+  align-items: stretch;
+}

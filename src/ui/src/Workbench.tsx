@@ -6,7 +6,7 @@ import Box from '@mui/material/Box';
 import Dashboard from './Dashboard';
 import Inspection from './Inspection';
 
-import './App.scss';
+import './assets/Workbench.scss';
 
 
 interface TabPanelProps {

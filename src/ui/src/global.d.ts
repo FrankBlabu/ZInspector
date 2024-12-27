@@ -13,6 +13,9 @@ interface Window {
         openProject: () => void;
         closeProject: () => void;
     };
+    renderer: {
+        onMeshChanged(callback: (mesh: Buffer) => void): void;
+    };
     versions: {
         node: () => string;
         chrome: () => string;

@@ -5,7 +5,7 @@ import CssBaseline from '@mui/material/CssBaseline';
 //import Button from '@mui/material/Button';
 
 import Workbench from './Workbench.tsx'
-import './App.scss';
+import './assets/App.scss';
 
 function App() {
 
