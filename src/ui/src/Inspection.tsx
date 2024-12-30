@@ -7,10 +7,11 @@ import { GLTFLoader, GLTF } from 'three/addons/loaders/GLTFLoader.js';
 import { Box, Container } from '@mui/material';
 
 import Explorer from './Explorer';
+import { BoxExpanding } from './Layout';
 
 import './assets/Inspection.scss';
 
-function MeshRenderer () {
+function MeshRenderer() {
 
     const [callbackRegistered, setCallbackRegistered] = useState(false);
     const { scene } = useThree();
@@ -54,19 +55,19 @@ function MeshRenderer () {
 function Inspection() {
 
     return (
-        <Container style={{ display: 'flex', height: '100vh' }}>
-            <Box className="explorer-container">
+        <Box className="inspection-container" style={{ width: '100%', height: '100%', display: 'flex', flexDirection: 'row' }}>
+            <Box>
                 <Explorer />
             </Box>
-            <Box className="canvas-container">
-                <Canvas>
+            <BoxExpanding className="canvas">
+                <Canvas id="canvas" style={{ width: '100%', height: '100%' }}>
                     <OrbitControls />
                     <ambientLight intensity={0.5} />
                     <directionalLight position={[5, 5, 5]} />
                     <MeshRenderer />
                 </Canvas>
-            </Box>
-        </Container>
+            </BoxExpanding>
+        </Box >
     );
 };
 
