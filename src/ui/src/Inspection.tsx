@@ -49,6 +49,7 @@ function MeshRenderer() {
     const { scene, camera } = useThree();
 
     useEffect(() => {
+
         const onMeshChanged = (mesh: Buffer) => {
             const blob = new Blob([mesh], { type: 'model/gltf-binary' });
             const url = URL.createObjectURL(blob);
@@ -59,9 +60,16 @@ function MeshRenderer() {
             });
         };
 
+        const onAdaptView = () => {
+            fitCameraToObject(camera, scene);
+        };
+
         window.renderer.onMeshChanged(onMeshChanged);
+        window.renderer.onAdaptView(onAdaptView);
+
         return () => {
             window.renderer.offMeshChanged(onMeshChanged);
+            window.renderer.offAdaptView(onAdaptView);
         };
     }, [scene, camera]);
 

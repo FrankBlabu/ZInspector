@@ -4,6 +4,7 @@ const explorerUpdateCallbacks = new Map<(tree: string) => void, (event: Electron
 const explorerExpandCallbacks = new Map<(ids: string[]) => void, (event: Electron.IpcRendererEvent, ids: string[]) => void>();
 const explorerSelectCallbacks = new Map<(ids: string[]) => void, (event: Electron.IpcRendererEvent, ids: string[]) => void>();
 const meshChangedCallbacks = new Map<(mesh: Buffer) => void, (event: Electron.IpcRendererEvent, mesh: Buffer) => void>();
+const adaptViewCallbacks = new Map<() => void, (event: Electron.IpcRendererEvent) => void>();
 
 //
 // 'app': Global application API (e.g. open/close project)
@@ -97,7 +98,6 @@ contextBridge.exposeInMainWorld('renderer', {
   // 'onMeshChanged': Register callback to be called when the mesh is changed
   //
   onMeshChanged: (callback: (mesh: Buffer) => void) => {
-    // Check if the callback is already registered
     if (meshChangedCallbacks.has(callback)) {
       console.warn('Callback already registered');
     }
@@ -114,6 +114,20 @@ contextBridge.exposeInMainWorld('renderer', {
       meshChangedCallbacks.delete(callback);
     }
   },
+
+  onAdaptView: (callback: () => void) => {
+    const wrappedCallback = (_event: Electron.IpcRendererEvent) => callback();
+    adaptViewCallbacks.set(callback, wrappedCallback);
+    ipcRenderer.on('renderer::adapt-view', (_event: Electron.IpcRendererEvent, mesh: Buffer) => callback());
+  },
+
+  offAdaptView: (callback: () => void) => {
+    const wrappedCallback = adaptViewCallbacks.get(callback);
+    if (wrappedCallback) {
+      ipcRenderer.off('renderer::adapt-view', wrappedCallback);
+      adaptViewCallbacks.delete(callback);
+    }
+  }
 });
 
 //

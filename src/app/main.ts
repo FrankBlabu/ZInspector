@@ -101,6 +101,10 @@ function createWindow(): void {
                     role: 'reload'
                 },
                 {
+                    label: 'Fit mesh into view',
+                    click: () => onFitMeshIntoView()
+                },
+                {
                     label: 'Update explorer',
                     click: () => onUpdateExplorer([], [])
                 },
@@ -215,6 +219,13 @@ async function onImportMesh() {
             }
         });
     }
+}
+
+/*
+ * Fit mesh into view
+ */
+async function onFitMeshIntoView(): Promise<void> {
+    AppState.mainWindow!.webContents.send('renderer::adapt-view');
 }
 
 

@@ -16,6 +16,8 @@ interface Window {
     renderer: {
         onMeshChanged(callback: (mesh: Buffer) => void): void;
         offMeshChanged(callback: (mesh: Buffer) => void): void;
+        onAdaptView(callback: () => void): void;
+        offAdaptView(callback: () => void): void;
     };
     versions: {
         node: () => string;
