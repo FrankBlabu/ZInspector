@@ -1,53 +1,69 @@
 //import React from "react";
 
-import { useState, useEffect } from 'react';
+import { useEffect } from 'react';
 import { Canvas, useThree } from "@react-three/fiber";
 import { OrbitControls } from "@react-three/drei";
-import { GLTFLoader, GLTF } from 'three/addons/loaders/GLTFLoader.js';
-import { Box, Container } from '@mui/material';
+import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
+import { Box } from '@mui/material';
+import * as THREE from 'three';
+import { Box3, Vector3, PerspectiveCamera, OrthographicCamera } from 'three';
 
 import Explorer from './Explorer';
 import { BoxExpanding } from './Layout';
 
 import './assets/Inspection.scss';
 
-function MeshRenderer() {
+function fitCameraToObject(
+    camera: PerspectiveCamera | OrthographicCamera,
+    object: THREE.Object3D,
+    offset = 1.25
+) {
+    // Compute bounding box.
+    const box = new Box3().setFromObject(object);
+    const center = box.getCenter(new Vector3());
+    const size = box.getSize(new Vector3());
+    const maxDim = Math.max(size.x, size.y, size.z);
 
-    const [callbackRegistered, setCallbackRegistered] = useState(false);
-    const { scene } = useThree();
+    if (camera instanceof PerspectiveCamera) {
+        // For perspective camera, adjust position and FOV-based distance.
+        const fov = camera.fov * (Math.PI / 180);
+        let cameraZ = maxDim / (2 * Math.tan(fov / 2));
+        cameraZ *= offset; // Add some padding.
+        camera.position.set(center.x, center.y, center.z + cameraZ);
+        camera.lookAt(center);
+    } else if (camera instanceof OrthographicCamera) {
+        // For orthographic camera, adjust frustum planes.
+        const halfSize = maxDim * 0.5 * offset;
+        camera.left = -halfSize;
+        camera.right = halfSize;
+        camera.top = halfSize;
+        camera.bottom = -halfSize;
+        camera.position.set(center.x, center.y, center.z + 10); // Slight offset on Z.
+        camera.lookAt(center);
+    }
+
+    camera.updateProjectionMatrix();
+}
+
+function MeshRenderer() {
+    const { scene, camera } = useThree();
 
     useEffect(() => {
-
-        let gltf: GLTF | null = null;
-
-        const onMeshChangedFunc = (mesh: Buffer) => {
-            console.log('*** Update: ', mesh.length, '***');
+        const onMeshChanged = (mesh: Buffer) => {
             const blob = new Blob([mesh], { type: 'model/gltf-binary' });
             const url = URL.createObjectURL(blob);
-            const loader = new GLTFLoader();
-
-            loader.load(url, (loaded_gltf) => {
-                console.log('*** GLTF: ', loaded_gltf, '***');
-                URL.revokeObjectURL(url);
-
-                gltf = loaded_gltf;
+            new GLTFLoader().load(url, (gltf) => {
                 scene.add(gltf.scene);
+                fitCameraToObject(camera, gltf.scene);
+                URL.revokeObjectURL(url);
             });
         };
 
-        if (!callbackRegistered) {
-            window.renderer.onMeshChanged(onMeshChangedFunc);
-            setCallbackRegistered(true);
-        }
-
+        window.renderer.onMeshChanged(onMeshChanged);
         return () => {
-            window.renderer.offMeshChanged(onMeshChangedFunc);
-            if (gltf) {
-                scene.remove(gltf.scene);
-            }
+            window.renderer.offMeshChanged(onMeshChanged);
         };
-
-    }, [callbackRegistered]);
+    }, [scene, camera]);
 
     return null;
 }
