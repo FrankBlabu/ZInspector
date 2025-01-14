@@ -5,7 +5,7 @@
  * It can be used to navigate through the projects and work with its items.
  */
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { TreeViewBaseItem } from '@mui/x-tree-view/models';
 import { useTreeViewApiRef } from '@mui/x-tree-view/hooks';
 import { RichTreeView } from '@mui/x-tree-view/RichTreeView';
@@ -15,8 +15,6 @@ import './assets/Explorer.scss';
 function Explorer() {
 
   const apiRef = useTreeViewApiRef();
-
-  const [callbackRegistered, setCallbackRegistered] = useState(false);
   const [treeData, setTreeData] = useState(() => {
     const items: TreeViewBaseItem[] = [{
       id: '',
@@ -27,48 +25,44 @@ function Explorer() {
     return items;
   });
 
+  const onUpdateFunc = useCallback((_event: Electron.IpcRendererEvent, elements: string) => {
+    const parsed_elements = JSON.parse(elements);
+    console.log('Update: ', parsed_elements);
+    setTreeData(parsed_elements);
+  }, []);
+
+  const onExpandFunc = useCallback((_event: Electron.IpcRendererEvent, ids: string[]) => {
+    console.log('Expand: ', ids);
+
+    const react_event = { type: 'custom' } as React.SyntheticEvent;
+    for (const id of ids) {
+      apiRef.current!.setItemExpansion(react_event, id, true);
+    }
+  }, [apiRef]);
+
+  const onSelectFunc = useCallback((_event: Electron.IpcRendererEvent, ids: string[]) => {
+    console.log('Select: ', ids);
+
+    for (const id of ids) {
+      apiRef.current?.selectItem({ event: { type: 'custom' } as React.SyntheticEvent, itemId: id, keepExistingSelection: ids.indexOf(id) !== 0 });
+    }
+  }, [apiRef]);
+
   useEffect(() => {
 
-    const onUpdateFunc = (elements: string) => {
-      const parsed_elements = JSON.parse(elements);
-      console.log('Update: ', parsed_elements);
-      setTreeData(parsed_elements);
-
-    };
-
-    const onExpandFunc = (ids: string[]) => {
-      console.log('Expand: ', ids);
-
-      const event = { type: 'custom' } as React.SyntheticEvent;
-      for (const id of ids) {
-        apiRef.current!.setItemExpansion(event, id, true);
-      }
-    }
-
-    const onSelectFunc = (ids: string[]) => {
-      console.log('Select: ', ids);
-
-      const event = { type: 'custom' } as React.SyntheticEvent;
-
-      for (const id of ids) {
-        apiRef.current?.selectItem({ event, itemId: id, keepExistingSelection: ids.indexOf(id) !== 0 });
-      }
-    }
-
-    if (!callbackRegistered) {
-      window.explorer.onUpdate(onUpdateFunc);
-      window.explorer.onExpandItems(onExpandFunc);
-      window.explorer.onSelectItems(onSelectFunc);
-      setCallbackRegistered(true);
-    }
+    console.log("*** Register");
+    window.explorer.onUpdate(onUpdateFunc);
+    window.explorer.onExpandItems(onExpandFunc);
+    window.explorer.onSelectItems(onSelectFunc);
 
     return () => {
+      console.log("*** Unregister");
       window.explorer.offUpdate(onUpdateFunc);
       window.explorer.offExpandItems(onExpandFunc);
       window.explorer.offSelectItems(onSelectFunc);
     };
 
-  }, [callbackRegistered, apiRef]);
+  }, [onUpdateFunc, onExpandFunc, onSelectFunc]);
 
   return (
     <div className="explorer">

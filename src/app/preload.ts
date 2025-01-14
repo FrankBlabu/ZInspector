@@ -1,8 +1,5 @@
 import { contextBridge, ipcRenderer } from 'electron';
 
-const explorerUpdateCallbacks = new Map<(tree: string) => void, (event: Electron.IpcRendererEvent, tree: string) => void>();
-const explorerExpandCallbacks = new Map<(ids: string[]) => void, (event: Electron.IpcRendererEvent, ids: string[]) => void>();
-const explorerSelectCallbacks = new Map<(ids: string[]) => void, (event: Electron.IpcRendererEvent, ids: string[]) => void>();
 const meshChangedCallbacks = new Map<(mesh: Buffer) => void, (event: Electron.IpcRendererEvent, mesh: Buffer) => void>();
 const adaptViewCallbacks = new Map<() => void, (event: Electron.IpcRendererEvent) => void>();
 
@@ -14,6 +11,8 @@ contextBridge.exposeInMainWorld('app', {
   closeProject: () => ipcRenderer.send('app::close-project'),
 });
 
+let cb: any = null;
+
 //
 // 'explorer': Everything related to the explorer
 //
@@ -23,69 +22,36 @@ contextBridge.exposeInMainWorld('explorer', {
   // 'onUpdate': Register callback to be called when the object tree is updated and the
   //             explorer must reflect that
   //
-  onUpdate: (callback: (tree: string) => void) => {
-
-    // Check if the callback is already registered
-    if (explorerUpdateCallbacks.has(callback)) {
-      console.warn('Callback already registered');
-    }
-
-    const wrappedCallback = (_event: Electron.IpcRendererEvent, tree: string) => callback(tree);
-    explorerUpdateCallbacks.set(callback, wrappedCallback);
-    ipcRenderer.on('explorer::update', wrappedCallback);
+  onUpdate: (callback: (_event: Electron.IpcRendererEvent, tree: string) => void) => {
+    console.log('***** 1a:', ipcRenderer.listenerCount('explorer::update'), callback === cb);
+    ipcRenderer.on('explorer::update', callback);
+    cb = callback;
+    console.log('***** 1b:', ipcRenderer.listenerCount('explorer::update'), callback === cb);
   },
-
-  offUpdate: (callback: (tree: string) => void) => {
-    const wrappedCallback = explorerUpdateCallbacks.get(callback);
-    if (wrappedCallback) {
-      ipcRenderer.off('explorer::update', wrappedCallback);
-      explorerUpdateCallbacks.delete(callback);
-    }
+  offUpdate: (callback: (_event: Electron.IpcRendererEvent, tree: string) => void) => {
+    console.log('***** 2a:', ipcRenderer.listenerCount('explorer::update'), callback === cb);
+    ipcRenderer.off('explorer::update', callback);
+    console.log('***** 2b:', ipcRenderer.listenerCount('explorer::update'));
   },
 
   //
   // 'onExpandItems': Register callback to be called when items should be expanded
   //
-  onExpandItems: (callback: (ids: string[]) => void) => {
-
-    // Check if the callback is already registered
-    if (explorerExpandCallbacks.has(callback)) {
-      console.warn('Callback already registered');
-    }
-
-    const wrappedCallback = (_event: Electron.IpcRendererEvent, ids: string[]) => callback(ids);
-    explorerExpandCallbacks.set(callback, wrappedCallback);
-    ipcRenderer.on('explorer::expand', wrappedCallback);
+  onExpandItems: (callback: (_event: Electron.IpcRendererEvent, ids: string[]) => void) => {
+    ipcRenderer.on('explorer::expand', callback);
   },
-
-  offExpandItems: (callback: (ids: string[]) => void) => {
-    const wrappedCallback = explorerExpandCallbacks.get(callback);
-    if (wrappedCallback) {
-      ipcRenderer.off('explorer::expand', wrappedCallback);
-      explorerExpandCallbacks.delete(callback);
-    }
+  offExpandItems: (callback: (_event: Electron.IpcRendererEvent, ids: string[]) => void) => {
+    ipcRenderer.off('explorer::expand', callback);
   },
 
   //
   // 'onSelectItems': Register callback to be called when items should be selected
   //
-  onSelectItems: (callback: (ids: string[]) => void) => {
-
-    // Check if the callback is already registered
-    if (explorerSelectCallbacks.has(callback)) {
-      console.warn('Callback already registered');
-    }
-
-    const wrappedCallback = (_event: Electron.IpcRendererEvent, ids: string[]) => callback(ids);
-    explorerSelectCallbacks.set(callback, wrappedCallback);
-    ipcRenderer.on('explorer::select', wrappedCallback);
+  onSelectItems: (callback: (_event: Electron.IpcRendererEvent, ids: string[]) => void) => {
+    ipcRenderer.on('explorer::select', callback);
   },
-  offSelectItems: (callback: (ids: string[]) => void) => {
-    const wrappedCallback = explorerSelectCallbacks.get(callback);
-    if (wrappedCallback) {
-      ipcRenderer.off('explorer::select', wrappedCallback);
-      explorerSelectCallbacks.delete(callback);
-    }
+  offSelectItems: (callback: (_event: Electron.IpcRendererEvent, ids: string[]) => void) => {
+    ipcRenderer.off('explorer::select', callback);
   },
 });
 
